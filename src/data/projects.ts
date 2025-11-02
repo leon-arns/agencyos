@@ -35,6 +35,13 @@ export interface ExternalLink {
   logoUrl?: string;
 }
 
+export interface Comment {
+  id: number;
+  author: string;
+  content: string;
+  timestamp: string;
+}
+
 export interface Ticket {
   id: number;
   projectId: number;
@@ -51,6 +58,7 @@ export interface Ticket {
   actualHours: number;
   screenshots?: string[];
   externalLinks?: ExternalLink[];
+  comments?: Comment[];
 }
 
 export const mockProjects: Project[] = [
@@ -225,6 +233,20 @@ export const mockTickets: Ticket[] = [
         title: "Style Guide",
         url: "#",
         platform: "notion"
+      }
+    ],
+    comments: [
+      {
+        id: 1,
+        author: "Max Mustermann",
+        content: "Bitte das neue Corporate Design berücksichtigen. Die aktuellen Entwürfe sehen schon sehr gut aus!",
+        timestamp: "2024-10-28T14:30:00Z"
+      },
+      {
+        id: 2,
+        author: "Lisa Schmidt",
+        content: "Danke für das Feedback! Ich habe die Farbpalette entsprechend angepasst und werde heute noch die responsive Varianten finalisieren.",
+        timestamp: "2024-10-29T09:15:00Z"
       }
     ]
   },

@@ -5,11 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink } from "@/data/projects";
+import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink, type Comment } from "@/data/projects";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -839,7 +840,7 @@ export default function ProjectDetailPage() {
 
       {/* Ticket Detail Modal */}
       <Dialog open={isTicketModalOpen} onOpenChange={setIsTicketModalOpen}>
-        <DialogContent className="max-w-2xl bg-background max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl bg-background max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               {selectedTicket && getTicketStatusIcon(selectedTicket.status)}
@@ -865,6 +866,58 @@ export default function ProjectDetailPage() {
                   <Badge className={getPriorityColor(selectedTicket.priority)} variant="outline">
                     {selectedTicket.priority}
                   </Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Personen */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Zugewiesen an</h4>
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {selectedTicket.assignee.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{selectedTicket.assignee}</span>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Erstellt von</h4>
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs bg-muted">
+                        {selectedTicket.reporter.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{selectedTicket.reporter}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Termine und Zeit */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Erstellt am
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedTicket.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Fällig am
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedTicket.dueDate).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 
@@ -932,57 +985,52 @@ export default function ProjectDetailPage() {
                 </>
               )}
 
-              <Separator />
-
-              {/* Personen */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Zugewiesen an</h4>
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">
-                        {selectedTicket.assignee.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{selectedTicket.assignee}</span>
+              {/* Kommentare */}
+              {selectedTicket.comments && selectedTicket.comments.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Kommentare</h4>
+                    <div className="space-y-4">
+                      {selectedTicket.comments.map((comment) => (
+                        <div key={comment.id} className="flex items-start space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs">
+                              {comment.author.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium">{comment.author}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(comment.timestamp).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Kommentar schreiben */}
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-start space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                              MM
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <Input
+                              placeholder="Kommentar schreiben..."
+                              className="text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Erstellt von</h4>
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs bg-muted">
-                        {selectedTicket.reporter.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{selectedTicket.reporter}</span>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Termine und Zeit */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium flex items-center">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Erstellt am
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(selectedTicket.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium flex items-center">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Fällig am
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(selectedTicket.dueDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
+                </>
+              )}
 
               <Separator />
 
