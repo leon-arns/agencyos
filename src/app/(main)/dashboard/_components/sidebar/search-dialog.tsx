@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { LayoutDashboard, ChartBar, Gauge, ShoppingBag, GraduationCap, Forklift, Search } from "lucide-react";
+import { LayoutDashboard, ChartBar, Gauge, ShoppingBag, GraduationCap, Forklift, Search, FolderOpen, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,11 @@ const searchItems = [
   { group: "Dashboards", icon: ShoppingBag, label: "E-Commerce", disabled: true },
   { group: "Dashboards", icon: GraduationCap, label: "Academy", disabled: true },
   { group: "Dashboards", icon: Forklift, label: "Logistics", disabled: true },
+  { group: "Projekte", icon: FolderOpen, label: "Alle Projekte" },
+  { group: "Projekte", icon: Plus, label: "Neues Projekt" },
+  { group: "Projekte", icon: LayoutDashboard, label: "Website Relaunch Acme Corp" },
+  { group: "Projekte", icon: LayoutDashboard, label: "Brand Identity Startup XYZ" },
+  { group: "Projekte", icon: LayoutDashboard, label: "E-Commerce Platform Migration" },
   { group: "Authentication", label: "Login v1" },
   { group: "Authentication", label: "Login v2" },
   { group: "Authentication", label: "Register v1" },

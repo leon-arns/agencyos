@@ -325,12 +325,12 @@ export default function ProjectDetailPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
               <DropdownMenuItem>
-                <Archive className="mr-2 h-4 w-4" />
+                <Archive className="h-4 w-4" />
                 Archivieren
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                <XCircle className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="text-red-400">
+                <XCircle className="h-4 w-4" />
                 Projekt löschen
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -544,7 +544,7 @@ export default function ProjectDetailPage() {
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Erledigte Tickets
                       </span>
-                      <span className="text-sm text-green-600 font-bold">
+                      <span className="text-sm">
                         {projectTickets.filter(t => t.status === "Erledigt").length}
                       </span>
                     </h4>
@@ -555,7 +555,7 @@ export default function ProjectDetailPage() {
                         <Clock className="mr-2 h-4 w-4" />
                         Zu erledigen
                       </span>
-                      <span className="text-sm text-blue-600 font-bold">
+                      <span className="text-sm">
                         {projectTickets.filter(t => t.status === "Zu erledigen").length}
                       </span>
                     </h4>
@@ -1023,7 +1023,7 @@ export default function ProjectDetailPage() {
                           {comment.screenshotIndex !== undefined && (
                             <button
                               onClick={() => selectedTicket?.screenshots && handleScreenshotClick(selectedTicket.screenshots[comment.screenshotIndex!], comment.screenshotIndex)}
-                              className="text-xs text-blue-600 hover:text-blue-800 hover:underline mb-1 block cursor-pointer"
+                              className="text-xs text-neutral-300 underline hover:no-underline mb-1 block cursor-pointer"
                             >
                               zu Screenshot {comment.screenshotIndex + 1}
                             </button>
@@ -1040,7 +1040,7 @@ export default function ProjectDetailPage() {
                   
                   {/* Kommentar schreiben */}
                   <div className="mt-4 pt-4 border-t">
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-center space-x-3">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                           MM
@@ -1179,7 +1179,7 @@ export default function ProjectDetailPage() {
               
               {/* Comment Input */}
               <div className="p-4 border-t">
-                <div className="flex items-start space-x-3">
+                <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                       MM
