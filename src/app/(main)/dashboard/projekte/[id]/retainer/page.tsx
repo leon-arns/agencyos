@@ -1,0 +1,785 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { mockProjects, mockTickets, type Project, type Ticket } from "@/data/projects";
+import { 
+  ArrowLeft, 
+  Calendar, 
+  DollarSign, 
+  Users, 
+  Clock,
+  Edit,
+  Archive,
+  MoreHorizontal,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  Pause,
+  Play,
+  MessageSquare,
+  FileText,
+  TrendingUp,
+  Target,
+  Activity,
+  Building,
+  Mail,
+  Phone
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Mock activity data
+const mockActivities = [
+  {
+    id: 1,
+    type: "status_change",
+    description: "Status geändert von 'Planung' zu 'In Bearbeitung'",
+    user: "Max Mustermann",
+    timestamp: "2024-11-01T14:30:00Z",
+    icon: Play
+  },
+  {
+    id: 2,
+    type: "comment",
+    description: "Kommentar hinzugefügt: 'Design-Review abgeschlossen'",
+    user: "Lisa Schmidt",
+    timestamp: "2024-10-30T16:45:00Z",
+    icon: MessageSquare
+  },
+  {
+    id: 3,
+    type: "milestone",
+    description: "Meilenstein erreicht: Homepage Design",
+    user: "Tom Weber",
+    timestamp: "2024-10-28T11:20:00Z",
+    icon: CheckCircle
+  },
+  {
+    id: 4,
+    type: "file_upload",
+    description: "Datei hochgeladen: wireframes_v2.pdf",
+    user: "Anna Müller",
+    timestamp: "2024-10-25T09:15:00Z",
+    icon: FileText
+  }
+];
+
+// Mock time tracking data
+const mockTimeEntries = [
+  {
+    date: "2024-11-01",
+    user: "Max Mustermann",
+    task: "Frontend Development",
+    hours: 8,
+    description: "React Component Development"
+  },
+  {
+    date: "2024-11-01",
+    user: "Lisa Schmidt",
+    task: "UI Design",
+    hours: 6,
+    description: "Homepage Layout Design"
+  },
+  {
+    date: "2024-10-31",
+    user: "Tom Weber",
+    task: "Backend API",
+    hours: 7,
+    description: "REST API Implementation"
+  },
+  {
+    date: "2024-10-31",
+    user: "Max Mustermann",
+    task: "Code Review",
+    hours: 2,
+    description: "PR Review and Testing"
+  }
+];
+
+export default function RetainerProjectDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const projectId = parseInt(params.id as string);
+  
+  const [project, setProject] = useState<Project | null>(null);
+  const [projectTickets, setProjectTickets] = useState<Ticket[]>([]);
+  const [ticketView, setTicketView] = useState<"list" | "kanban">("list");
+
+  useEffect(() => {
+    // Simulate API call to fetch project details
+    const foundProject = mockProjects.find(p => p.id === projectId);
+    if (foundProject) {
+      setProject(foundProject);
+      setProjectTickets(mockTickets.filter(t => t.projectId === projectId));
+    }
+  }, [projectId]);
+
+  if (!project) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Projekt nicht gefunden</h1>
+          <Button onClick={() => router.back()} className="mt-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Zurück
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const getStatusColor = (status: Project["status"]) => {
+    switch (status) {
+      case "Planning": return "bg-blue-100 text-blue-800";
+      case "In Progress": return "bg-yellow-100 text-yellow-800";
+      case "Review": return "bg-purple-100 text-purple-800";
+      case "Completed": return "bg-green-100 text-green-800";
+      case "On Hold": return "bg-gray-100 text-gray-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: Project["priority"]) => {
+    switch (priority) {
+      case "Low": return "bg-gray-100 text-gray-800";
+      case "Medium": return "bg-blue-100 text-blue-800";
+      case "High": return "bg-orange-100 text-orange-800";
+      case "Critical": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getTicketStatusIcon = (status: Ticket["status"]) => {
+    switch (status) {
+      case "Neu": return <AlertCircle className="h-4 w-4 text-blue-500" />;
+      case "Zu erledigen": return <Clock className="h-4 w-4 text-yellow-500" />;
+      case "In Abnahme": return <Activity className="h-4 w-4 text-purple-500" />;
+      case "Erledigt": return <CheckCircle className="h-4 w-4 text-green-500" />;
+      default: return <XCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getTicketStatusColor = (status: Ticket["status"]) => {
+    switch (status) {
+      case "Neu": return "bg-blue-100 text-blue-800";
+      case "Zu erledigen": return "bg-yellow-100 text-yellow-800";
+      case "In Abnahme": return "bg-purple-100 text-purple-800";
+      case "Erledigt": return "bg-green-100 text-green-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const kanbanColumns = [
+    { id: "Neu", title: "Neu", color: "border-blue-200" },
+    { id: "Zu erledigen", title: "Zu erledigen", color: "border-yellow-200" },
+    { id: "In Abnahme", title: "In Abnahme", color: "border-purple-200" },
+    { id: "Erledigt", title: "Erledigt", color: "border-green-200" }
+  ];
+
+  const totalBudgetUsed = (project.spent / project.budget) * 100;
+  const totalTimeLogged = mockTimeEntries.reduce((sum, entry) => sum + entry.hours, 0);
+
+  // Health Score Berechnung
+  const calculateHealthScore = () => {
+    let score = 100;
+    
+    // Budget-Faktor (30% Gewichtung)
+    if (totalBudgetUsed > 90) score -= 30;
+    else if (totalBudgetUsed > 80) score -= 20;
+    else if (totalBudgetUsed > 70) score -= 10;
+    
+    // Zeitplan-Faktor (30% Gewichtung)
+    const daysRemaining = Math.ceil((new Date(project.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    const totalDays = Math.ceil((new Date(project.endDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 60 * 60 * 24));
+    const timeProgress = ((totalDays - daysRemaining) / totalDays) * 100;
+    
+    if (timeProgress > project.progress + 20) score -= 30; // Sehr hinter Zeitplan
+    else if (timeProgress > project.progress + 10) score -= 15; // Etwas hinter Zeitplan
+    
+    // Ticket-Fortschritt (25% Gewichtung)
+    const completedTickets = projectTickets.filter(t => t.status === "Erledigt").length;
+    const totalTickets = projectTickets.length;
+    const ticketProgress = totalTickets > 0 ? (completedTickets / totalTickets) * 100 : 0;
+    
+    if (ticketProgress < 20 && project.progress > 50) score -= 25;
+    else if (ticketProgress < 40 && project.progress > 70) score -= 15;
+    
+    // Überfällige Tickets (15% Gewichtung)
+    const overdueTickets = projectTickets.filter(t => 
+      new Date(t.dueDate) < new Date() && t.status !== "Erledigt"
+    ).length;
+    
+    if (overdueTickets > 2) score -= 15;
+    else if (overdueTickets > 0) score -= 10;
+    
+    return Math.max(0, Math.min(100, score));
+  };
+
+  const healthScore = calculateHealthScore();
+  
+  const getHealthColor = (score: number) => {
+    if (score >= 80) return { color: "text-green-600", bg: "bg-green-100", label: "Ausgezeichnet" };
+    if (score >= 60) return { color: "text-yellow-600", bg: "bg-yellow-100", label: "Gut" };
+    if (score >= 40) return { color: "text-orange-600", bg: "bg-orange-100", label: "Aufmerksamkeit" };
+    return { color: "text-red-600", bg: "bg-red-100", label: "Kritisch" };
+  };
+
+  const healthStatus = getHealthColor(healthScore);
+
+  return (
+    <div className="flex-1 space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{project.name} (Retainer)</h1>
+            <p className="text-muted-foreground">{project.client} • {project.category} • Retainer-Projekt</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline">
+            <Edit className="mr-2 h-4 w-4" />
+            Bearbeiten
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Archive className="mr-2 h-4 w-4" />
+                Archivieren
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600">
+                <XCircle className="mr-2 h-4 w-4" />
+                Projekt löschen
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Status and Progress Cards */}
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Kunde</CardTitle>
+            <Building className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+                  {project.clientLogo || project.client.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">{project.client}</div>
+                <div className="flex items-center space-x-2 mt-1">
+                  <Badge className={getStatusColor(project.status)} variant="secondary">
+                    {project.status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Fortschritt</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{project.progress}%</div>
+            <Progress value={project.progress} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-2">
+              Priorität: <Badge className={getPriorityColor(project.priority)} variant="outline">
+                {project.priority}
+              </Badge>
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Budget</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">€{project.spent.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              von €{project.budget.toLocaleString()} ({totalBudgetUsed.toFixed(1)}%)
+            </p>
+            <Progress value={totalBudgetUsed} className="mt-2" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Team</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{project.team.length}</div>
+            <p className="text-xs text-muted-foreground">Teammitglieder</p>
+            <div className="flex space-x-1 mt-2">
+              {project.team.slice(0, 3).map((member, index) => (
+                <Avatar key={index} className="h-6 w-6">
+                  <AvatarFallback className="text-xs">
+                    {member.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {project.team.length > 3 && (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs">
+                  +{project.team.length - 3}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Übersicht</TabsTrigger>
+          <TabsTrigger value="tickets">Tickets ({projectTickets.length})</TabsTrigger>
+          <TabsTrigger value="time">Zeiterfassung</TabsTrigger>
+          <TabsTrigger value="files">Dateien</TabsTrigger>
+          <TabsTrigger value="activity">Aktivität</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Projektdetails</CardTitle>
+                <CardDescription>Grundlegende Informationen zum Projekt</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Beschreibung</h4>
+                  <p className="text-sm text-muted-foreground">{project.description}</p>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium flex items-center justify-between">
+                      <span className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Startdatum
+                      </span>
+                      <span className="text-sm text-muted-foreground font-normal">
+                        {new Date(project.startDate).toLocaleDateString()}
+                      </span>
+                    </h4>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium flex items-center justify-between">
+                      <span className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Enddatum
+                      </span>
+                      <span className="text-sm text-muted-foreground font-normal">
+                        {new Date(project.endDate).toLocaleDateString()}
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Ansprechpartner</h4>
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {project.clientContact.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{project.clientContact.name}</p>
+                        <p className="text-xs text-muted-foreground">{project.clientContact.position}</p>
+                        <div className="mt-1 space-y-1">
+                          <p className="text-xs text-muted-foreground flex items-center">
+                            <Mail className="mr-1 h-3 w-3" />
+                            {project.clientContact.email}
+                          </p>
+                          {project.clientContact.phone && (
+                            <p className="text-xs text-muted-foreground flex items-center">
+                              <Phone className="mr-1 h-3 w-3" />
+                              {project.clientContact.phone}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Projektmanager</h4>
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs bg-blue-100 text-blue-800">
+                          {project.projectManager.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{project.projectManager.name}</p>
+                        <p className="text-xs text-muted-foreground">{project.projectManager.role}</p>
+                        <div className="mt-1 space-y-1">
+                          <p className="text-xs text-muted-foreground flex items-center">
+                            <Mail className="mr-1 h-3 w-3" />
+                            {project.projectManager.email}
+                          </p>
+                          {project.projectManager.phone && (
+                            <p className="text-xs text-muted-foreground flex items-center">
+                              <Phone className="mr-1 h-3 w-3" />
+                              {project.projectManager.phone}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Projektstatistiken</CardTitle>
+                <CardDescription>Wichtige Kennzahlen auf einen Blick</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium flex items-center justify-between">
+                      <span className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Erledigte Tickets
+                      </span>
+                      <span className="text-sm text-green-600 font-bold">
+                        {projectTickets.filter(t => t.status === "Erledigt").length}
+                      </span>
+                    </h4>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium flex items-center justify-between">
+                      <span className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4" />
+                        Zu erledigen
+                      </span>
+                      <span className="text-sm text-blue-600 font-bold">
+                        {projectTickets.filter(t => t.status === "Zu erledigen").length}
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Geschätzte Zeit</span>
+                    <span>{projectTickets.reduce((sum, t) => sum + t.estimatedHours, 0)}h</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Erfasste Zeit</span>
+                    <span>{totalTimeLogged}h</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium">
+                    <span>Budget verbraucht</span>
+                    <span>{totalBudgetUsed.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Tage verbleibend</span>
+                    <span>{Math.ceil((new Date(project.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Projekt Health Score</h4>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 rounded-full ${healthStatus.bg} flex items-center justify-center`}>
+                        <span className={`text-lg font-bold ${healthStatus.color}`}>
+                          {healthScore}
+                        </span>
+                      </div>
+                      <div>
+                        <div className={`font-medium ${healthStatus.color}`}>
+                          {healthStatus.label}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Basierend auf Budget, Zeitplan & Tickets
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-muted-foreground">Score</div>
+                      <div className={`text-sm font-bold ${healthStatus.color}`}>
+                        {healthScore}/100
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        healthScore >= 80 ? 'bg-green-500' :
+                        healthScore >= 60 ? 'bg-yellow-500' :
+                        healthScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${healthScore}%` }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="tickets" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Projekt Tickets</CardTitle>
+                <CardDescription>Alle Aufgaben und Tickets für dieses Projekt</CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={ticketView === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTicketView("list")}
+                >
+                  Liste
+                </Button>
+                <Button
+                  variant={ticketView === "kanban" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTicketView("kanban")}
+                >
+                  Kanban
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {ticketView === "list" ? (
+                <div className="space-y-4">
+                  {projectTickets.map((ticket) => (
+                    <div key={ticket.id} className="flex items-center space-x-4 rounded-lg border p-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          {getTicketStatusIcon(ticket.status)}
+                          <h4 className="font-medium">{ticket.title}</h4>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-1">
+                          {ticket.description}
+                        </p>
+                        <div className="flex items-center space-x-4 mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            Assignee: {ticket.assignee}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Due: {new Date(ticket.dueDate).toLocaleDateString()}
+                          </span>
+                          <Badge variant="outline" size="sm">
+                            {ticket.priority}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">{ticket.actualHours}h / {ticket.estimatedHours}h</div>
+                        <Progress 
+                          value={(ticket.actualHours / ticket.estimatedHours) * 100} 
+                          className="w-20 mt-1" 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {kanbanColumns.map((column) => {
+                    const columnTickets = projectTickets.filter(ticket => ticket.status === column.id);
+                    return (
+                      <div key={column.id} className={`rounded-lg border-2 ${column.color} bg-muted/20 p-4`}>
+                        <div className="mb-4">
+                          <h3 className="font-semibold text-sm flex items-center justify-between">
+                            {column.title}
+                            <Badge variant="secondary" className="ml-2">
+                              {columnTickets.length}
+                            </Badge>
+                          </h3>
+                        </div>
+                        <div className="space-y-3">
+                          {columnTickets.map((ticket) => (
+                            <div key={ticket.id} className="rounded-lg border bg-background p-3 shadow-sm">
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-medium text-sm line-clamp-2">{ticket.title}</h4>
+                                <Badge className={getPriorityColor(ticket.priority)} variant="outline">
+                                  {ticket.priority}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                                {ticket.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarFallback className="text-xs">
+                                      {ticket.assignee.split(' ').map(n => n[0]).join('')}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="text-xs text-muted-foreground flex items-center space-x-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>{new Date(ticket.dueDate).toLocaleDateString()}</span>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {ticket.actualHours}h / {ticket.estimatedHours}h
+                                </div>
+                              </div>
+                              <div className="mt-2">
+                                <Progress 
+                                  value={(ticket.actualHours / ticket.estimatedHours) * 100} 
+                                  className="h-1"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                          {columnTickets.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground text-sm">
+                              Keine Tickets
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="time" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Zeiterfassung</CardTitle>
+              <CardDescription>Erfasste Arbeitszeiten für dieses Projekt</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {mockTimeEntries.map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {entry.user.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-medium">{entry.user}</h4>
+                        <p className="text-sm text-muted-foreground">{entry.task}</p>
+                        <p className="text-xs text-muted-foreground">{entry.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{entry.hours}h</div>
+                      <div className="text-sm text-muted-foreground">{entry.date}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="files" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Projektdateien</CardTitle>
+              <CardDescription>Alle Dateien und Dokumente zu diesem Projekt</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Keine Dateien vorhanden
+                </p>
+                <Button variant="outline" className="mt-4">
+                  Dateien hochladen
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="activity" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Projektaktivität</CardTitle>
+              <CardDescription>Chronologie aller Aktivitäten in diesem Projekt</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {mockActivities.map((activity) => {
+                  const ActivityIcon = activity.icon;
+                  return (
+                    <div key={activity.id} className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                          <ActivityIcon className="h-4 w-4" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm">{activity.description}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="text-xs text-muted-foreground">{activity.user}</span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(activity.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
