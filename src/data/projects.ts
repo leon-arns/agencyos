@@ -40,6 +40,7 @@ export interface Comment {
   author: string;
   content: string;
   timestamp: string;
+  screenshotIndex?: number; // Optional: which screenshot this comment relates to
 }
 
 export interface Ticket {
@@ -247,6 +248,27 @@ export const mockTickets: Ticket[] = [
         author: "Lisa Schmidt",
         content: "Danke für das Feedback! Ich habe die Farbpalette entsprechend angepasst und werde heute noch die responsive Varianten finalisieren.",
         timestamp: "2024-10-29T09:15:00Z"
+      },
+      {
+        id: 3,
+        author: "Michael Johnson",
+        content: "Die Hero-Section gefällt mir sehr gut! Könnten wir den Call-to-Action Button etwas prominenter gestalten?",
+        timestamp: "2024-10-30T11:20:00Z",
+        screenshotIndex: 0
+      },
+      {
+        id: 4,
+        author: "Lisa Schmidt",
+        content: "Gute Idee! Ich werde den Button größer machen und ihm mehr Kontrast geben.",
+        timestamp: "2024-10-30T14:45:00Z",
+        screenshotIndex: 0
+      },
+      {
+        id: 5,
+        author: "Tom Weber",
+        content: "Das mobile Layout sieht fantastisch aus! Die Navigation ist sehr intuitiv.",
+        timestamp: "2024-10-31T10:15:00Z",
+        screenshotIndex: 1
       }
     ]
   },

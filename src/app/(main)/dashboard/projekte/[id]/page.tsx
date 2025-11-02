@@ -129,6 +129,9 @@ export default function ProjectDetailPage() {
   const [ticketView, setTicketView] = useState<"list" | "kanban">("list");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
+  const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
+  const [isScreenshotModalOpen, setIsScreenshotModalOpen] = useState(false);
 
   useEffect(() => {
     // Simulate API call to fetch project details
@@ -287,6 +290,12 @@ export default function ProjectDetailPage() {
   const handleTicketClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
     setIsTicketModalOpen(true);
+  };
+
+  const handleScreenshotClick = (screenshot: string, index?: number) => {
+    setSelectedScreenshot(screenshot);
+    setSelectedScreenshotIndex(index ?? null);
+    setIsScreenshotModalOpen(true);
   };
 
   return (
@@ -976,7 +985,7 @@ export default function ProjectDetailPage() {
                             src={screenshot} 
                             alt={`Screenshot ${index + 1}`}
                             className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => window.open(screenshot, '_blank')}
+                            onClick={() => handleScreenshotClick(screenshot, index)}
                           />
                         </div>
                       ))}
@@ -986,51 +995,67 @@ export default function ProjectDetailPage() {
               )}
 
               {/* Kommentare */}
-              {selectedTicket.comments && selectedTicket.comments.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium mb-3">Kommentare</h4>
-                    <div className="space-y-4">
-                      {selectedTicket.comments.map((comment) => (
-                        <div key={comment.id} className="flex items-start space-x-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {comment.author.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium">{comment.author}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(comment.timestamp).toLocaleString()}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{comment.content}</p>
+              <Separator />
+              <div>
+                <h4 className="text-sm font-medium mb-3">Kommentare</h4>
+                <div className="space-y-4">
+                  {selectedTicket.comments && selectedTicket.comments.length > 0 ? (
+                    selectedTicket.comments.map((comment) => (
+                      <div key={comment.id} className="flex items-start space-x-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            {comment.author.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-sm font-medium">{comment.author}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(comment.timestamp).toLocaleString('de-DE', { 
+                                day: '2-digit', 
+                                month: '2-digit', 
+                                year: '2-digit', 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </span>
                           </div>
+                          {comment.screenshotIndex !== undefined && (
+                            <button
+                              onClick={() => selectedTicket?.screenshots && handleScreenshotClick(selectedTicket.screenshots[comment.screenshotIndex!], comment.screenshotIndex)}
+                              className="text-xs text-blue-600 hover:text-blue-800 hover:underline mb-1 block cursor-pointer"
+                            >
+                              zu Screenshot {comment.screenshotIndex + 1}
+                            </button>
+                          )}
+                          <p className="text-sm text-muted-foreground">{comment.content}</p>
                         </div>
-                      ))}
-                      
-                      {/* Kommentar schreiben */}
-                      <div className="mt-4 pt-4 border-t">
-                        <div className="flex items-start space-x-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                              MM
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <Input
-                              placeholder="Kommentar schreiben..."
-                              className="text-sm"
-                            />
-                          </div>
-                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      Keine Kommentare vorhanden
+                    </div>
+                  )}
+                  
+                  {/* Kommentar schreiben */}
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="flex items-start space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                          MM
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <Input
+                          placeholder="Kommentar schreiben..."
+                          className="text-sm"
+                        />
                       </div>
                     </div>
                   </div>
-                </>
-              )}
+                </div>
+              </div>
 
               <Separator />
 
@@ -1088,6 +1113,88 @@ export default function ProjectDetailPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Screenshot Modal */}
+      <Dialog open={isScreenshotModalOpen} onOpenChange={setIsScreenshotModalOpen}>
+        <DialogContent className="!max-w-[85vw] !w-[85vw] !max-h-[85vh] !h-[85vh] p-0 bg-background [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80" style={{maxWidth: '85vw', width: '85vw', maxHeight: '85vh', height: '85vh'}}>
+          <DialogTitle className="sr-only">Screenshot Viewer</DialogTitle>
+          <div className="flex h-[85vh]">
+            {/* Left Side - Image */}
+            <div className="flex-1 flex items-center justify-center bg-black/5 dark:bg-black/20 rounded-l-lg overflow-hidden">
+              {selectedScreenshot && (
+                <img 
+                  src={selectedScreenshot} 
+                  alt="Screenshot"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            
+            {/* Right Side - Comments */}
+            <div className="w-80 border-l bg-background flex flex-col rounded-r-lg">
+              {/* Header */}
+              <div className="p-4 border-b">
+                <h3 className="font-semibold">Kommentare</h3>
+                <p className="text-sm text-muted-foreground">Screenshot {selectedScreenshotIndex !== null ? selectedScreenshotIndex + 1 : '?'}</p>
+              </div>
+              
+              {/* Comments List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/80">
+                {selectedTicket?.comments && selectedTicket.comments
+                  .filter(comment => comment.screenshotIndex === selectedScreenshotIndex)
+                  .map((comment) => (
+                  <div key={comment.id} className="flex items-start space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {comment.author.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-sm font-medium">{comment.author}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(comment.timestamp).toLocaleString('de-DE', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: '2-digit', 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {(!selectedTicket?.comments || 
+                  selectedTicket.comments.filter(comment => comment.screenshotIndex === selectedScreenshotIndex).length === 0) && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    Noch keine Kommentare zu diesem Screenshot
+                  </div>
+                )}
+              </div>
+              
+              {/* Comment Input */}
+              <div className="p-4 border-t">
+                <div className="flex items-start space-x-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                      MM
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Kommentar schreiben..."
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
