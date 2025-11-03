@@ -45,6 +45,15 @@ export default function ProjektePage() {
     }
   };
 
+  // Helper function to format date in German format (dd.mm.yy)
+  const formatGermanDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    return `${day}.${month}.${year}`;
+  };
+
   return (
     <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between">
@@ -138,7 +147,7 @@ export default function ProjektePage() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(project.endDate).toLocaleDateString()}</span>
+                      <span>{formatGermanDate(project.endDate)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -185,7 +194,7 @@ export default function ProjektePage() {
                   </Badge>
                 </div>
                 <div className="col-span-1">{project.progress}%</div>
-                <div className="col-span-2">{new Date(project.endDate).toLocaleDateString()}</div>
+                <div className="col-span-2">{formatGermanDate(project.endDate)}</div>
                 <div className="col-span-2">€{project.budget.toLocaleString()}</div>
               </div>
             ))}

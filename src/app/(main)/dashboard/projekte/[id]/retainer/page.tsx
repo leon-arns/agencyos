@@ -400,7 +400,7 @@ export default function RetainerProjectDetailPage() {
                         Startdatum
                       </span>
                       <span className="text-sm text-muted-foreground font-normal">
-                        {new Date(project.startDate).toLocaleDateString()}
+                        {formatGermanDate(project.startDate)}
                       </span>
                     </h4>
                   </div>
@@ -411,7 +411,7 @@ export default function RetainerProjectDetailPage() {
                         Enddatum
                       </span>
                       <span className="text-sm text-muted-foreground font-normal">
-                        {new Date(project.endDate).toLocaleDateString()}
+                        {formatGermanDate(project.endDate)}
                       </span>
                     </h4>
                   </div>
@@ -615,7 +615,7 @@ export default function RetainerProjectDetailPage() {
                             Assignee: {ticket.assignee}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            Due: {new Date(ticket.dueDate).toLocaleDateString()}
+                            Due: {formatGermanDate(ticket.dueDate)}
                           </span>
                           <Badge variant="outline" size="sm">
                             {ticket.priority}
@@ -667,7 +667,7 @@ export default function RetainerProjectDetailPage() {
                                   </Avatar>
                                   <div className="text-xs text-muted-foreground flex items-center space-x-1">
                                     <Calendar className="h-3 w-3" />
-                                    <span>{new Date(ticket.dueDate).toLocaleDateString()}</span>
+                                    <span>{formatGermanDate(ticket.dueDate)}</span>
                                   </div>
                                 </div>
                                 <div className="text-xs text-muted-foreground">
@@ -772,7 +772,7 @@ export default function RetainerProjectDetailPage() {
                           <span className="text-xs text-muted-foreground">{activity.user}</span>
                           <span className="text-xs text-muted-foreground">•</span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(activity.timestamp).toLocaleString()}
+                            {new Date(activity.timestamp).toLocaleString('de-DE')}
                           </span>
                         </div>
                       </div>

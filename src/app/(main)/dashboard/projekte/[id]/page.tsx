@@ -32,7 +32,14 @@ import {
   Mail,
   Phone,
   ExternalLink as ExternalLinkIcon,
-  ChevronDown
+  ChevronDown,
+  Download,
+  FileImage,
+  FileVideo,
+  Upload,
+  HardDrive,
+  User,
+  Trash2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -195,6 +202,40 @@ const mockDetailedTimeEntries = [
   }
 ];
 
+// Mock project files data
+const mockProjectFiles = [
+  {
+    id: 1,
+    projectId: 1,
+    name: "Homepage_Wireframes.pdf",
+    type: "pdf",
+    size: "2.4 MB",
+    uploadedBy: "Lisa Schmidt",
+    uploadedAt: "2024-11-01T10:30:00Z",
+    description: "Wireframes und Layout-Konzepte für die neue Homepage"
+  },
+  {
+    id: 2,
+    projectId: 1,
+    name: "Logo_Final_Version.png",
+    type: "image",
+    size: "856 KB",
+    uploadedBy: "Anna Müller",
+    uploadedAt: "2024-10-30T15:45:00Z",
+    description: "Finales Logo Design in hoher Auflösung"
+  },
+  {
+    id: 3,
+    projectId: 1,
+    name: "Animation_Hero_Section.mp4",
+    type: "video",
+    size: "12.7 MB",
+    uploadedBy: "Max Mustermann",
+    uploadedAt: "2024-10-29T09:15:00Z",
+    description: "Animierte Vorschau der Hero-Section für Homepage"
+  }
+];
+
 // Helper function to format date in German format (dd.mm.yy)
 const formatGermanDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -212,6 +253,50 @@ const formatGermanTime = (dateString: string) => {
   return `${hours}:${minutes}`;
 };
 
+// Helper function to get file icon based on type
+const getFileIcon = (type: string) => {
+  switch (type) {
+    case 'pdf':
+      return <FileText className="h-5 w-5 text-red-500" />;
+    case 'image':
+      return <FileImage className="h-5 w-5 text-blue-500" />;
+    case 'video':
+      return <FileVideo className="h-5 w-5 text-purple-500" />;
+    default:
+      return <FileText className="h-5 w-5 text-gray-500" />;
+  }
+};
+
+// Helper function to get file preview
+const getFilePreview = (file: any) => {
+  switch (file.type) {
+    case 'pdf':
+      return (
+        <div className="flex items-center justify-center bg-red-50 dark:bg-red-950/20 rounded-lg p-8">
+          <FileText className="h-16 w-16 text-red-500" />
+        </div>
+      );
+    case 'image':
+      return (
+        <div className="flex items-center justify-center bg-blue-50 dark:bg-blue-950/20 rounded-lg p-8">
+          <FileImage className="h-16 w-16 text-blue-500" />
+        </div>
+      );
+    case 'video':
+      return (
+        <div className="flex items-center justify-center bg-purple-50 dark:bg-purple-950/20 rounded-lg p-8">
+          <FileVideo className="h-16 w-16 text-purple-500" />
+        </div>
+      );
+    default:
+      return (
+        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-950/20 rounded-lg p-8">
+          <FileText className="h-16 w-16 text-gray-500" />
+        </div>
+      );
+  }
+};
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -227,6 +312,8 @@ export default function ProjectDetailPage() {
   const [isScreenshotModalOpen, setIsScreenshotModalOpen] = useState(false);
   const [isTimeTrackingModalOpen, setIsTimeTrackingModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
 
   useEffect(() => {
     // Simulate API call to fetch project details
@@ -236,6 +323,9 @@ export default function ProjectDetailPage() {
       setProjectTickets(mockTickets.filter(t => t.projectId === projectId));
     }
   }, [projectId]);
+
+  // Filter files for current project
+  const projectFiles = mockProjectFiles.filter(file => file.projectId === projectId);
 
   if (!project) {
     return (
@@ -398,6 +488,11 @@ export default function ProjectDetailPage() {
     setIsTimeTrackingModalOpen(true);
   };
 
+  const handleFileClick = (file: any) => {
+    setSelectedFile(file);
+    setIsFileModalOpen(true);
+  };
+
   return (
     <div className="flex-1 space-y-6">
       {/* Header */}
@@ -553,7 +648,7 @@ export default function ProjectDetailPage() {
                         Startdatum
                       </span>
                       <span className="text-sm text-muted-foreground font-normal">
-                        {new Date(project.startDate).toLocaleDateString()}
+                        {formatGermanDate(project.startDate)}
                       </span>
                     </h4>
                   </div>
@@ -564,7 +659,7 @@ export default function ProjectDetailPage() {
                         Enddatum
                       </span>
                       <span className="text-sm text-muted-foreground font-normal">
-                        {new Date(project.endDate).toLocaleDateString()}
+                        {formatGermanDate(project.endDate)}
                       </span>
                     </h4>
                   </div>
@@ -775,7 +870,7 @@ export default function ProjectDetailPage() {
                             Assignee: {ticket.assignee}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            Due: {new Date(ticket.dueDate).toLocaleDateString()}
+                            Due: {formatGermanDate(ticket.dueDate)}
                           </span>
                           <Badge variant="outline" className="text-xs">
                             {ticket.priority}
@@ -831,7 +926,7 @@ export default function ProjectDetailPage() {
                                   </Avatar>
                                   <div className="text-xs text-muted-foreground flex items-center space-x-1">
                                     <Calendar className="h-3 w-3" />
-                                    <span>{new Date(ticket.dueDate).toLocaleDateString()}</span>
+                                    <span>{formatGermanDate(ticket.dueDate)}</span>
                                   </div>
                                 </div>
                                 <div className="text-xs text-muted-foreground">
@@ -899,23 +994,68 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="files" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Projektdateien</CardTitle>
-              <CardDescription>Alle Dateien und Dokumente zu diesem Projekt</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Keine Dateien vorhanden
-                </p>
-                <Button variant="outline" className="mt-4">
-                  Dateien hochladen
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 grid-cols-1">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-row items-center justify-between">
+                  <div className="space-y-2">
+                    <CardTitle>Projektdateien</CardTitle>
+                    <CardDescription>Alle Dateien und Dokumente zu diesem Projekt</CardDescription>
+                  </div>
+                  <Button variant="outline">
+                    Dateien hochladen
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {projectFiles.length > 0 ? (
+                  <div className="space-y-4">
+                    {projectFiles.map((file) => (
+                      <div 
+                        key={file.id} 
+                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => handleFileClick(file)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-2">
+                            {getFileIcon(file.type)}
+                            <h4 className="font-medium truncate">{file.name}</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">{file.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <User className="h-3 w-3" />
+                              <span>{file.uploadedBy}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>{formatGermanDate(file.uploadedAt)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <HardDrive className="h-3 w-3" />
+                              <span>{file.size}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="sm">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Keine Dateien vorhanden
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="activity" className="space-y-4">
@@ -941,7 +1081,7 @@ export default function ProjectDetailPage() {
                           <span className="text-xs text-muted-foreground">{activity.user}</span>
                           <span className="text-xs text-muted-foreground">•</span>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(activity.timestamp).toLocaleString()}
+                            {new Date(activity.timestamp).toLocaleString('de-DE')}
                           </span>
                         </div>
                       </div>
@@ -1023,7 +1163,7 @@ export default function ProjectDetailPage() {
                     Erstellt am
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(selectedTicket.createdAt).toLocaleDateString()}
+                    {formatGermanDate(selectedTicket.createdAt)}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -1032,7 +1172,7 @@ export default function ProjectDetailPage() {
                     Fällig am
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(selectedTicket.dueDate).toLocaleDateString()}
+                    {formatGermanDate(selectedTicket.dueDate)}
                   </p>
                 </div>
               </div>
@@ -1361,6 +1501,84 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Detail Modal */}
+      <Dialog open={isFileModalOpen} onOpenChange={setIsFileModalOpen}>
+        <DialogContent className="max-w-2xl bg-background max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80">
+          <DialogTitle>{selectedFile?.name}</DialogTitle>
+          <div className="space-y-6">
+            
+            {/* Preview Section */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Vorschau</h4>
+              {selectedFile && getFilePreview(selectedFile)}
+            </div>
+
+            <Separator />
+
+            {/* File Information */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Datei-Informationen</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>Dateiname</span>
+                  <span className="font-medium">{selectedFile?.name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Beschreibung</span>
+                  <span className="text-muted-foreground text-right">{selectedFile?.description}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Dateigröße</span>
+                  <span>{selectedFile?.size}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Dateityp</span>
+                  <span className="uppercase">{selectedFile?.type}</span>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Upload Information */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Upload-Details</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>Hochgeladen von</span>
+                  <span>{selectedFile?.uploadedBy}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Upload-Datum</span>
+                  <span>{selectedFile && formatGermanDate(selectedFile.uploadedAt)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Upload-Zeit</span>
+                  <span>{selectedFile && formatGermanTime(selectedFile.uploadedAt)}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          
+          <Separator />
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsFileModalOpen(false)}>
+              Schließen
+            </Button>
+            <Button variant="outline">
+              <Download className="mr-1 h-4 w-4" />
+              Herunterladen
+            </Button>
+            <Button variant="destructive">
+              <Trash2 className="mr-1 h-4 w-4" />
+              Löschen
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
