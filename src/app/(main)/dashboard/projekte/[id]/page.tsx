@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink, type Comment } from "@/data/projects";
+import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink } from "@/data/projects";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -23,12 +23,10 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
-  Pause,
   Play,
   MessageSquare,
   FileText,
   TrendingUp,
-  Target,
   Activity,
   Building,
   Mail,
@@ -93,32 +91,126 @@ const mockTimeEntries = [
   {
     date: "2024-11-01",
     user: "Max Mustermann",
-    task: "Frontend Development",
-    hours: 8,
-    description: "React Component Development"
+    role: "Frontend Developer",
+    hours: 8
   },
   {
     date: "2024-11-01",
     user: "Lisa Schmidt",
-    task: "UI Design",
-    hours: 6,
-    description: "Homepage Layout Design"
+    role: "UI Designer",
+    hours: 6
   },
   {
     date: "2024-10-31",
     user: "Tom Weber",
-    task: "Backend API",
-    hours: 7,
-    description: "REST API Implementation"
+    role: "Backend Developer",
+    hours: 7
   },
   {
     date: "2024-10-31",
     user: "Max Mustermann",
-    task: "Code Review",
-    hours: 2,
-    description: "PR Review and Testing"
+    role: "Frontend Developer",
+    hours: 2
   }
 ];
+
+// Detailed time tracking entries for modal
+const mockDetailedTimeEntries = [
+  {
+    id: 1,
+    user: "Max Mustermann",
+    role: "Frontend Developer",
+    ticketId: 1,
+    ticketTitle: "Homepage Design fertigstellen",
+    hours: 4,
+    startTime: "2024-11-01T09:00:00Z",
+    endTime: "2024-11-01T13:00:00Z",
+    description: "React Komponenten für Hero-Section entwickelt"
+  },
+  {
+    id: 2,
+    user: "Max Mustermann", 
+    role: "Frontend Developer",
+    ticketId: 1,
+    ticketTitle: "Homepage Design fertigstellen",
+    hours: 3,
+    startTime: "2024-11-01T14:00:00Z",
+    endTime: "2024-11-01T17:00:00Z",
+    description: "Responsive Design implementiert"
+  },
+  {
+    id: 3,
+    user: "Max Mustermann",
+    role: "Frontend Developer", 
+    ticketId: 5,
+    ticketTitle: "SEO Optimierung",
+    hours: 1,
+    startTime: "2024-11-01T17:00:00Z",
+    endTime: "2024-11-01T18:00:00Z",
+    description: "Meta-Tags überprüft und optimiert"
+  },
+  {
+    id: 4,
+    user: "Lisa Schmidt",
+    role: "UI Designer",
+    ticketId: 1,
+    ticketTitle: "Homepage Design fertigstellen",
+    hours: 5,
+    startTime: "2024-11-01T09:30:00Z",
+    endTime: "2024-11-01T14:30:00Z",
+    description: "Design-System und Komponenten finalisiert"
+  },
+  {
+    id: 5,
+    user: "Lisa Schmidt",
+    role: "UI Designer",
+    ticketId: 1,
+    ticketTitle: "Homepage Design fertigstellen", 
+    hours: 1,
+    startTime: "2024-11-01T15:30:00Z",
+    endTime: "2024-11-01T16:30:00Z",
+    description: "Feedback vom Client eingearbeitet"
+  },
+  {
+    id: 6,
+    user: "Tom Weber",
+    role: "Backend Developer",
+    ticketId: 2,
+    ticketTitle: "Kontaktformular implementieren",
+    hours: 7,
+    startTime: "2024-10-31T09:00:00Z",
+    endTime: "2024-10-31T16:00:00Z",
+    description: "API Endpunkte und Validierung entwickelt"
+  },
+  {
+    id: 7,
+    user: "Max Mustermann",
+    role: "Frontend Developer",
+    ticketId: 6,
+    ticketTitle: "Performance Testing",
+    hours: 2,
+    startTime: "2024-10-31T14:00:00Z", 
+    endTime: "2024-10-31T16:00:00Z",
+    description: "Lighthouse Tests durchgeführt und Performance optimiert"
+  }
+];
+
+// Helper function to format date in German format (dd.mm.yy)
+const formatGermanDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+  return `${day}.${month}.${year}`;
+};
+
+// Helper function to format time in German format (HH:MM)
+const formatGermanTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -133,6 +225,8 @@ export default function ProjectDetailPage() {
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
   const [isScreenshotModalOpen, setIsScreenshotModalOpen] = useState(false);
+  const [isTimeTrackingModalOpen, setIsTimeTrackingModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate API call to fetch project details
@@ -297,6 +391,11 @@ export default function ProjectDetailPage() {
     setSelectedScreenshot(screenshot);
     setSelectedScreenshotIndex(index ?? null);
     setIsScreenshotModalOpen(true);
+  };
+
+  const handleTimeTrackingClick = (user: string) => {
+    setSelectedUser(user);
+    setIsTimeTrackingModalOpen(true);
   };
 
   return (
@@ -772,7 +871,11 @@ export default function ProjectDetailPage() {
             <CardContent>
               <div className="space-y-4">
                 {mockTimeEntries.map((entry, index) => (
-                  <div key={index} className="flex items-center justify-between rounded-lg border p-4">
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleTimeTrackingClick(entry.user)}
+                  >
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
@@ -781,13 +884,12 @@ export default function ProjectDetailPage() {
                       </Avatar>
                       <div>
                         <h4 className="font-medium">{entry.user}</h4>
-                        <p className="text-sm text-muted-foreground">{entry.task}</p>
-                        <p className="text-xs text-muted-foreground">{entry.description}</p>
+                        <p className="text-sm text-muted-foreground">{entry.role}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{entry.hours}h</div>
-                      <div className="text-sm text-muted-foreground">{entry.date}</div>
+                      <div className="font-medium">{entry.hours} Std</div>
+                      <div className="text-sm text-muted-foreground">Zuletzt aktualisiert: {formatGermanDate(entry.date)}</div>
                     </div>
                   </div>
                 ))}
@@ -1206,6 +1308,59 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Time Tracking Detail Modal */}
+      <Dialog open={isTimeTrackingModalOpen} onOpenChange={setIsTimeTrackingModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogTitle>Zeiterfassung Details - {selectedUser}</DialogTitle>
+          <div className="space-y-4">
+            {selectedUser && mockDetailedTimeEntries
+              .filter(entry => entry.user === selectedUser)
+              .map((entry) => (
+                <div key={entry.id} className="flex items-start justify-between rounded-lg border p-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Badge variant="outline" className="text-xs">
+                        Ticket #{entry.ticketId}
+                      </Badge>
+                      <h4 className="font-medium">{entry.ticketTitle}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{entry.description}</p>
+                    <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                      <span>📅 {formatGermanDate(entry.startTime)}</span>
+                      <span>🕒 {formatGermanTime(entry.startTime)} - {formatGermanTime(entry.endTime)}</span>
+                      <span>⏱️ {entry.hours} Std</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-lg">{entry.hours} Std</div>
+                  </div>
+                </div>
+              ))}
+            
+            {selectedUser && mockDetailedTimeEntries.filter(entry => entry.user === selectedUser).length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="mx-auto h-12 w-12 mb-2" />
+                <p>Keine Zeiterfassung-Einträge gefunden für {selectedUser}</p>
+              </div>
+            )}
+            
+            {/* Summary */}
+            {selectedUser && (
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Gesamt erfasste Zeit:</span>
+                  <span className="font-bold text-lg">
+                    {mockDetailedTimeEntries
+                      .filter(entry => entry.user === selectedUser)
+                      .reduce((sum, entry) => sum + entry.hours, 0)} Std
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

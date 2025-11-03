@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
   ChartBar,
   Banknote,
-  Gauge,
   GraduationCap,
   FolderOpen,
   UserPlus,

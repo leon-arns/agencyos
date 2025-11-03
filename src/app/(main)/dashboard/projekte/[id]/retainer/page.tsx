@@ -83,32 +83,37 @@ const mockTimeEntries = [
   {
     date: "2024-11-01",
     user: "Max Mustermann",
-    task: "Frontend Development",
-    hours: 8,
-    description: "React Component Development"
+    role: "Frontend Developer",
+    hours: 8
   },
   {
     date: "2024-11-01",
     user: "Lisa Schmidt",
-    task: "UI Design",
-    hours: 6,
-    description: "Homepage Layout Design"
+    role: "UI Designer",
+    hours: 6
   },
   {
     date: "2024-10-31",
     user: "Tom Weber",
-    task: "Backend API",
-    hours: 7,
-    description: "REST API Implementation"
+    role: "Backend Developer",
+    hours: 7
   },
   {
     date: "2024-10-31",
     user: "Max Mustermann",
-    task: "Code Review",
-    hours: 2,
-    description: "PR Review and Testing"
+    role: "Frontend Developer",
+    hours: 2
   }
 ];
+
+// Helper function to format date in German format (dd.mm.yy)
+const formatGermanDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+  return `${day}.${month}.${year}`;
+};
 
 export default function RetainerProjectDetailPage() {
   const params = useParams();
@@ -710,13 +715,12 @@ export default function RetainerProjectDetailPage() {
                       </Avatar>
                       <div>
                         <h4 className="font-medium">{entry.user}</h4>
-                        <p className="text-sm text-muted-foreground">{entry.task}</p>
-                        <p className="text-xs text-muted-foreground">{entry.description}</p>
+                        <p className="text-sm text-muted-foreground">{entry.role}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{entry.hours}h</div>
-                      <div className="text-sm text-muted-foreground">{entry.date}</div>
+                      <div className="font-medium">{entry.hours} Std</div>
+                      <div className="text-sm text-muted-foreground">Zuletzt aktualisiert: {formatGermanDate(entry.date)}</div>
                     </div>
                   </div>
                 ))}
