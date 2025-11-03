@@ -33,7 +33,8 @@ import {
   Building,
   Mail,
   Phone,
-  ExternalLink as ExternalLinkIcon
+  ExternalLink as ExternalLinkIcon,
+  ChevronDown
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -144,7 +145,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Projekt nicht gefunden</h1>
           <Button onClick={() => router.back()} className="mt-4">
@@ -299,7 +300,7 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -386,9 +387,9 @@ export default function ProjectDetailPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{project.spent.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{project.spent.toLocaleString()} €</div>
             <p className="text-xs text-muted-foreground">
-              von €{project.budget.toLocaleString()} ({totalBudgetUsed.toFixed(1)}%)
+              von {project.budget.toLocaleString()} € ({totalBudgetUsed.toFixed(1)}%) 
             </p>
             <Progress value={totalBudgetUsed} className="mt-2" />
           </CardContent>
@@ -627,27 +628,30 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="tickets" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Projekt Tickets</CardTitle>
-                <CardDescription>Alle Aufgaben und Tickets für dieses Projekt</CardDescription>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={ticketView === "list" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTicketView("list")}
-                >
-                  Liste
-                </Button>
-                <Button
-                  variant={ticketView === "kanban" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTicketView("kanban")}
-                >
-                  Kanban
-                </Button>
+          <div className="grid gap-4 grid-cols-1">
+            <Card>
+            <CardHeader>
+              <div className="flex flex-row items-center justify-between">
+                <div className="space-y-2">
+                  <CardTitle>Projekt Tickets</CardTitle>
+                  <CardDescription>Alle Aufgaben und Tickets für dieses Projekt</CardDescription>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant={ticketView === "list" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTicketView("list")}
+                  >
+                    Liste
+                  </Button>
+                  <Button
+                    variant={ticketView === "kanban" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTicketView("kanban")}
+                  >
+                    Kanban
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -756,6 +760,7 @@ export default function ProjectDetailPage() {
               )}
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="time" className="space-y-4">
@@ -1061,7 +1066,14 @@ export default function ProjectDetailPage() {
 
               {/* Zeiterfassung */}
               <div>
-                <h4 className="text-sm font-medium mb-3">Zeiterfassung</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium">Zeiterfassung</h4>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Play className="h-4 w-4" />
+                    <span>0:00</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span>Geschätzte Zeit</span>

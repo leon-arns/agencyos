@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import { LayoutDashboard, ChartBar, Gauge, ShoppingBag, GraduationCap, Forklift, Search, FolderOpen, Plus } from "lucide-react";
 
@@ -15,25 +16,27 @@ import {
 } from "@/components/ui/command";
 
 const searchItems = [
-  { group: "Dashboards", icon: LayoutDashboard, label: "Default" },
-  { group: "Dashboards", icon: ChartBar, label: "CRM", disabled: true },
-  { group: "Dashboards", icon: Gauge, label: "Analytics", disabled: true },
-  { group: "Dashboards", icon: ShoppingBag, label: "E-Commerce", disabled: true },
-  { group: "Dashboards", icon: GraduationCap, label: "Academy", disabled: true },
-  { group: "Dashboards", icon: Forklift, label: "Logistics", disabled: true },
-  { group: "Projekte", icon: FolderOpen, label: "Alle Projekte" },
-  { group: "Projekte", icon: Plus, label: "Neues Projekt" },
-  { group: "Projekte", icon: LayoutDashboard, label: "Website Relaunch Acme Corp" },
-  { group: "Projekte", icon: LayoutDashboard, label: "Brand Identity Startup XYZ" },
-  { group: "Projekte", icon: LayoutDashboard, label: "E-Commerce Platform Migration" },
-  { group: "Authentication", label: "Login v1" },
-  { group: "Authentication", label: "Login v2" },
-  { group: "Authentication", label: "Register v1" },
-  { group: "Authentication", label: "Register v2" },
+  { group: "Dashboards", icon: LayoutDashboard, label: "Default", href: "/dashboard/default" },
+  { group: "Dashboards", icon: ChartBar, label: "CRM", href: "/dashboard/crm", disabled: true },
+  { group: "Dashboards", icon: Gauge, label: "Analytics", href: "/dashboard/analytics", disabled: true },
+  { group: "Dashboards", icon: ShoppingBag, label: "E-Commerce", href: "/dashboard/coming-soon", disabled: true },
+  { group: "Dashboards", icon: GraduationCap, label: "Academy", href: "/dashboard/coming-soon", disabled: true },
+  { group: "Dashboards", icon: Forklift, label: "Logistics", href: "/dashboard/coming-soon", disabled: true },
+  { group: "Projekte", icon: FolderOpen, label: "Alle Projekte", href: "/dashboard/projekte" },
+  { group: "Projekte", icon: Plus, label: "Neues Projekt", href: "/dashboard/projekte?action=new" },
+  { group: "Projekte", icon: LayoutDashboard, label: "Website Relaunch Acme Corp", href: "/dashboard/projekte/1" },
+  { group: "Projekte", icon: LayoutDashboard, label: "Brand Identity Startup XYZ", href: "/dashboard/projekte/2" },
+  { group: "Projekte", icon: LayoutDashboard, label: "E-Commerce Platform Migration", href: "/dashboard/projekte/3" },
+  { group: "Authentication", label: "Login v1", href: "/auth/v1/login" },
+  { group: "Authentication", label: "Login v2", href: "/auth/v2/login" },
+  { group: "Authentication", label: "Register v1", href: "/auth/v1/register" },
+  { group: "Authentication", label: "Register v2", href: "/auth/v2/register" },
 ];
 
 export function SearchDialog() {
   const [open, setOpen] = React.useState(false);
+  const router = useRouter();
+
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
@@ -44,6 +47,13 @@ export function SearchDialog() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  const handleSelect = (item: typeof searchItems[0]) => {
+    setOpen(false);
+    if (item.href && !item.disabled) {
+      router.push(item.href);
+    }
+  };
 
   return (
     <>
@@ -69,7 +79,12 @@ export function SearchDialog() {
                 {searchItems
                   .filter((item) => item.group === group)
                   .map((item) => (
-                    <CommandItem className="!py-1.5" key={item.label} onSelect={() => setOpen(false)}>
+                    <CommandItem 
+                      className="!py-1.5" 
+                      key={item.label} 
+                      onSelect={() => handleSelect(item)}
+                      disabled={item.disabled}
+                    >
                       {item.icon && <item.icon />}
                       <span>{item.label}</span>
                     </CommandItem>
