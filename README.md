@@ -23,13 +23,13 @@ die sowohl intern als auch für Kunden nutzbar ist.
 - Ticket-System mit Aufgabenverwaltung  
 - Upload-Bereich für Dateien  
 - Seite für normales Projekt & Retainerprojekt
+- Kanban-Board mit Drag & Drop mit shadcn.io Komponente
 
 ---
 
 ## 📦 Geplante Module
 
 ### Projekte
-- Kanban-Board mit Drag & Drop   
 - Echtes Timetracking im Ticket
 - Aktivitätsanzeige
 
