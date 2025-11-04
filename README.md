@@ -18,15 +18,20 @@ die sowohl intern als auch für Kunden nutzbar ist.
 - UI-Module in Arbeit (Projekte, CRM, Onboarding, Analytics)  
 - Noch keine Datenbankanbindung  
 
+### Projekte
+- Projektübersicht mit Status, Verantwortlichen, Deadlines und Timetracking
+- Ticket-System mit Aufgabenverwaltung  
+- Upload-Bereich für Dateien  
+- Seite für normales Projekt & Retainerprojekt
+
 ---
 
 ## 📦 Geplante Module
 
 ### Projekte
-- Projektübersicht mit Status, Verantwortlichen und Deadlines  
-- Ticket-System mit Aufgabenverwaltung  
-- Kanban-Board mit Drag & Drop  
-- Upload-Bereich für Dateien  
+- Kanban-Board mit Drag & Drop   
+- Echtes Timetracking im Ticket
+- Aktivitätsanzeige
 
 ### CRM
 - Kunden- und Unternehmensverwaltung  
