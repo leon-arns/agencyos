@@ -44,6 +44,12 @@ die sowohl intern als auch für Kunden nutzbar ist.
 - Integration von Google Analytics und Meta Ads  
 - Dashboard mit Diagrammen und Filteroptionen  
 
+### Chat
+- Chat zwischen Accounts
+
+### Notifications
+- Benachrichtigungen über Änderungen in Projekten etc.
+
 ---
 
 ## 🧩 Weitere geplante Funktionen
