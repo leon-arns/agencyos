@@ -1594,9 +1594,18 @@ export default function ProjectDetailPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">{entry.description}</p>
                     <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                      <span>📅 {formatGermanDate(entry.startTime)}</span>
-                      <span>🕒 {formatGermanTime(entry.startTime)} - {formatGermanTime(entry.endTime)}</span>
-                      <span>⏱️ {entry.hours} Std</span>
+                      <span className="flex items-center">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {formatGermanDate(entry.startTime)}
+                      </span>
+                      <span className="flex items-center">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {formatGermanTime(entry.startTime)} - {formatGermanTime(entry.endTime)}
+                      </span>
+                      <span className="flex items-center">
+                        <Activity className="mr-1 h-3 w-3" />
+                        {entry.hours} Std
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
