@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { PlusCircleIcon, MailIcon, ChevronRight } from "lucide-react";
+import { PlusCircleIcon, MailIcon, ChevronRight, FolderOpen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,38 +45,38 @@ const NavItemExpanded = ({
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
-  return (
-    <Collapsible key={item.title} asChild defaultOpen={isSubmenuOpen(item.subItems)} className="group/collapsible">
+  if (!item.subItems) {
+    return (
       <SidebarMenuItem>
-        <CollapsibleTrigger asChild>
-          {item.subItems ? (
-            <SidebarMenuButton
-              disabled={item.comingSoon}
-              isActive={isActive(item.url, item.subItems)}
-              tooltip={item.title}
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
+        <SidebarMenuButton
+          asChild
+          aria-disabled={item.comingSoon}
+          isActive={isActive(item.url)}
+          tooltip={item.title}
+        >
+          <Link href={item.url as any} target={item.newTab ? "_blank" : undefined}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            {item.comingSoon && <IsComingSoon />}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <SidebarMenuItem>
+      <Accordion type="single" collapsible defaultValue={isSubmenuOpen(item.subItems) ? item.title : undefined}>
+        <AccordionItem value={item.title} className="border-none">
+          <AccordionTrigger className="hover:no-underline py-2 px-2 rounded-md text-left text-sm font-medium transition-all [&>svg]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent [&[data-state=open]_.chevron-icon]:rotate-90">
+            <div className="flex items-center gap-2 w-full">
+              {item.icon && <item.icon className="shrink-0 size-4" />}
+              <span className="flex-1">{item.title}</span>
               {item.comingSoon && <IsComingSoon />}
-              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          ) : (
-            <SidebarMenuButton
-              asChild
-              aria-disabled={item.comingSoon}
-              isActive={isActive(item.url)}
-              tooltip={item.title}
-            >
-              <Link href={item.url as any} target={item.newTab ? "_blank" : undefined}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-                {item.comingSoon && <IsComingSoon />}
-              </Link>
-            </SidebarMenuButton>
-          )}
-        </CollapsibleTrigger>
-        {item.subItems && (
-          <CollapsibleContent>
+              <ChevronRight className="chevron-icon shrink-0 size-4 transition-transform duration-200" />
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pb-0 pt-1">
             <SidebarMenuSub>
               {item.subItems.map((subItem) => (
                 <SidebarMenuSubItem key={subItem.title}>
@@ -89,10 +90,10 @@ const NavItemExpanded = ({
                 </SidebarMenuSubItem>
               ))}
             </SidebarMenuSub>
-          </CollapsibleContent>
-        )}
-      </SidebarMenuItem>
-    </Collapsible>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </SidebarMenuItem>
   );
 };
 

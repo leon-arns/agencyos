@@ -70,24 +70,6 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/analytics",
         icon: TrendingUp,
       },
-      {
-        title: "E-commerce",
-        url: "/dashboard/coming-soon",
-        icon: ShoppingBag,
-        comingSoon: true,
-      },
-      {
-        title: "Academy",
-        url: "/dashboard/coming-soon",
-        icon: GraduationCap,
-        comingSoon: true,
-      },
-      {
-        title: "Logistics",
-        url: "/dashboard/coming-soon",
-        icon: Forklift,
-        comingSoon: true,
-      },
     ],
   },
   {
@@ -102,6 +84,7 @@ export const sidebarItems: NavGroup[] = [
           { title: "Alle Projekte", url: "/dashboard/projekte" },
           { title: "Kanban Board", url: "/dashboard/projekte/kanban" },
           { title: "Tickets", url: "/dashboard/projekte/tickets" },
+          { title: "Blueprints", url: "/dashboard/projekte/blueprints" },
         ],
       },
       {

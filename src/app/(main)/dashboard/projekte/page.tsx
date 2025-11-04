@@ -109,9 +109,9 @@ export default function ProjektePage() {
         </TabsList>
 
         <TabsContent value="grid" className="space-y-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 justify-between">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow">
+              <Card key={project.id} className="hover:shadow-lg transition-shadow flex flex-col">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{project.name}</CardTitle>
@@ -136,43 +136,45 @@ export default function ProjektePage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                <CardContent className="flex-1 flex flex-col">
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                     {project.description}
                   </p>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Fortschritt</span>
-                      <span>{project.progress}%</span>
+                  <div className="mt-auto space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Fortschritt</span>
+                        <span>{project.progress}%</span>
+                      </div>
+                      <Progress value={project.progress} className="h-2" />
                     </div>
-                    <Progress value={project.progress} className="h-2" />
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatGermanDate(project.endDate)}</span>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatGermanDate(project.endDate)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatCurrency(project.budget)} €</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>{project.team.length} Mitarbeiter</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                        <span>{project.category}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatCurrency(project.budget)} €</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{project.team.length} Mitarbeiter</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                      <span>{project.category}</span>
-                    </div>
-                  </div>
 
-                  <Link href={project.isRetainer ? `/dashboard/projekte/${project.id}/retainer` : `/dashboard/projekte/${project.id}`} className="w-full">
-                    <Button variant="outline" className="w-full">
-                      Details anzeigen
-                    </Button>
-                  </Link>
+                    <Link href={project.isRetainer ? `/dashboard/projekte/${project.id}/retainer` : `/dashboard/projekte/${project.id}`} className="w-full">
+                      <Button variant="outline" className="w-full">
+                        Details anzeigen
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             ))}
