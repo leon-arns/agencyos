@@ -398,11 +398,11 @@ export default function OnboardingPage() {
                       <SelectValue placeholder="Budget-Range auswählen" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="5000-10000">€5.000 - €10.000</SelectItem>
-                      <SelectItem value="10000-25000">€10.000 - €25.000</SelectItem>
-                      <SelectItem value="25000-50000">€25.000 - €50.000</SelectItem>
-                      <SelectItem value="50000-100000">€50.000 - €100.000</SelectItem>
-                      <SelectItem value="100000+">€100.000+</SelectItem>
+                      <SelectItem value="5000-10000">5.000 € - 10.000 €</SelectItem>
+                      <SelectItem value="10000-25000">10.000 € - 25.000 €</SelectItem>
+                      <SelectItem value="25000-50000">25.000 € - 50.000 €</SelectItem>
+                      <SelectItem value="50000-100000">50.000 € - 100.000 €</SelectItem>
+                      <SelectItem value="100000+">100.000+ €</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

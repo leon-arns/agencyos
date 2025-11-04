@@ -1,7 +1,7 @@
 "use client";
 
 import { format, subMonths } from "date-fns";
-import { Wallet, BadgeDollarSign } from "lucide-react";
+import { Wallet, Euro } from "lucide-react";
 import { Area, AreaChart, Line, LineChart, Bar, BarChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,7 +99,7 @@ export function OverviewCards() {
       <Card>
         <CardHeader>
           <div className="bg-destructive/10 w-fit rounded-lg p-2">
-            <BadgeDollarSign className="text-destructive size-5" />
+            <Euro className="text-destructive size-5" />
           </div>
         </CardHeader>
         <CardContent className="flex size-full flex-col justify-between">

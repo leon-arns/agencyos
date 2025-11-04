@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { mockProjects, type Project } from "@/data/projects";
-import { FolderOpen, Users, Calendar, DollarSign, Search, Filter, Plus } from "lucide-react";
+import { FolderOpen, Users, Calendar, Wallet, Search, Filter, Plus, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 export default function ProjektePage() {
@@ -52,6 +52,11 @@ export default function ProjektePage() {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear().toString().slice(-2);
     return `${day}.${month}.${year}`;
+  };
+
+  // Helper function to format currency consistently for server and client
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('de-DE');
   };
 
   return (
@@ -109,26 +114,26 @@ export default function ProjektePage() {
               <Card key={project.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {project.client}
-                      </p>
-                    </div>
-                    <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
+                    <FolderOpen className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   </div>
-                  <div className="flex gap-2">
-                    <Badge className={getStatusColor(project.status)}>
-                      {project.status}
-                    </Badge>
-                    <Badge className={getPriorityColor(project.priority)}>
-                      {project.priority}
-                    </Badge>
-                    {project.isRetainer && (
-                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                        Retainer
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {project.client}
+                    </p>
+                    <div className="flex gap-2">
+                      <Badge className={getStatusColor(project.status)}>
+                        {project.status}
                       </Badge>
-                    )}
+                      <Badge className={getPriorityColor(project.priority)}>
+                        {project.priority}
+                      </Badge>
+                      {project.isRetainer && (
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          Retainer
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -150,14 +155,17 @@ export default function ProjektePage() {
                       <span>{formatGermanDate(project.endDate)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      <span>€{project.budget.toLocaleString()}</span>
+                      <Wallet className="h-4 w-4 text-muted-foreground" />
+                      <span>{formatCurrency(project.budget)} €</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{project.team.length} Mitarbeiter</span>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>{project.team.length} Mitarbeiter</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                      <span>{project.category}</span>
+                    </div>
                   </div>
 
                   <Link href={project.isRetainer ? `/dashboard/projekte/${project.id}/retainer` : `/dashboard/projekte/${project.id}`} className="w-full">
@@ -195,7 +203,7 @@ export default function ProjektePage() {
                 </div>
                 <div className="col-span-1">{project.progress}%</div>
                 <div className="col-span-2">{formatGermanDate(project.endDate)}</div>
-                <div className="col-span-2">€{project.budget.toLocaleString()}</div>
+                <div className="col-span-2">{formatCurrency(project.budget)} €</div>
               </div>
             ))}
           </div>

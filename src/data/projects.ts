@@ -6,6 +6,12 @@ export interface Project {
   priority: "Low" | "Medium" | "High" | "Critical";
   client: string;
   clientLogo?: string;
+  clientAddress?: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
   clientContact: {
     name: string;
     email: string;
@@ -26,6 +32,7 @@ export interface Project {
   progress: number;
   category: "Web Development" | "Brand Design" | "Marketing" | "Consulting";
   isRetainer?: boolean;
+  externalLinks?: ExternalLink[];
 }
 
 export interface ExternalLink {
@@ -71,6 +78,12 @@ export const mockProjects: Project[] = [
     priority: "High",
     client: "Acme Corp",
     clientLogo: "AC",
+    clientAddress: {
+      street: "Musterstraße 123",
+      city: "Berlin",
+      postalCode: "10115",
+      country: "Deutschland"
+    },
     clientContact: {
       name: "Michael Johnson",
       email: "m.johnson@acme-corp.com",
@@ -89,7 +102,19 @@ export const mockProjects: Project[] = [
     spent: 12500,
     team: ["Max Mustermann", "Lisa Schmidt", "Tom Weber"],
     progress: 65,
-    category: "Web Development"
+    category: "Web Development",
+    externalLinks: [
+      {
+        title: "Live-System",
+        url: "https://www.acme-corp.com",
+        platform: "custom"
+      },
+      {
+        title: "Staging",
+        url: "https://staging.acme-corp.com",
+        platform: "custom"
+      }
+    ]
   },
   {
     id: 2,
@@ -404,7 +429,27 @@ export const mockTickets: Ticket[] = [
     dueDate: "2024-11-10",
     tags: ["Backup", "Maintenance", "Monitoring"],
     estimatedHours: 2,
-    actualHours: 0
+    actualHours: 0,
+    screenshots: [
+      "https://placehold.co/800x600/333333/ffffff?text=Backup+Dashboard",
+      "https://placehold.co/800x600/666666/ffffff?text=Backup+Log"
+    ],
+    comments: [
+      {
+        id: 10,
+        author: "Tom Weber",
+        content: "Das Backup-Dashboard zeigt alle aktuellen Backup-Status an. Bitte prüfen Sie die Logs der letzten 7 Tage.",
+        timestamp: "2024-11-01T10:30:00Z",
+        screenshotIndex: 0
+      },
+      {
+        id: 11,
+        author: "Max Mustermann", 
+        content: "Die Backup-Logs sehen gut aus. Alle automatischen Backups wurden erfolgreich erstellt.",
+        timestamp: "2024-11-02T14:15:00Z",
+        screenshotIndex: 1
+      }
+    ]
   },
   {
     id: 9,

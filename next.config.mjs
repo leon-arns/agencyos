@@ -4,6 +4,7 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  allowedDevOrigins: ["192.168.178.23"],
   async redirects() {
     return [
       {

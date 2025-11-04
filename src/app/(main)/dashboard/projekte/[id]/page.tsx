@@ -14,7 +14,7 @@ import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink
 import { 
   ArrowLeft, 
   Calendar, 
-  DollarSign, 
+  Wallet, 
   Users, 
   Clock,
   Edit,
@@ -32,6 +32,10 @@ import {
   Mail,
   Phone,
   ExternalLink as ExternalLinkIcon,
+  Globe,
+  MessageCircle,
+  FolderOpen,
+  Link,
   ChevronDown,
   Download,
   FileImage,
@@ -253,6 +257,11 @@ const formatGermanTime = (dateString: string) => {
   return `${hours}:${minutes}`;
 };
 
+// Helper function to format currency consistently for server and client
+const formatCurrency = (amount: number) => {
+  return amount.toLocaleString('de-DE');
+};
+
 // Helper function to get file icon based on type
 const getFileIcon = (type: string) => {
   switch (type) {
@@ -394,23 +403,23 @@ export default function ProjectDetailPage() {
         };
       case "github": 
         return { 
-          logo: "💻" 
+          logo: <Globe className="h-3 w-3" />
         };
       case "notion": 
         return { 
-          logo: "📝" 
+          logo: <FileText className="h-3 w-3" />
         };
       case "slack": 
         return { 
-          logo: "💬" 
+          logo: <MessageCircle className="h-3 w-3" />
         };
       case "drive": 
         return { 
-          logo: "📁" 
+          logo: <FolderOpen className="h-3 w-3" />
         };
       default: 
         return { 
-          logo: "🔗" 
+          logo: <Link className="h-3 w-3" />
         };
     }
   };
@@ -496,40 +505,81 @@ export default function ProjectDetailPage() {
   return (
     <div className="flex-1 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="space-y-4 sm:space-y-0">
+        {/* Mobile: Buttons on top */}
+        <div className="flex items-center justify-between sm:hidden">
           <Button variant="ghost" size="sm" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-            <p className="text-muted-foreground">{project.client} • {project.category}</p>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Bearbeiten
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Archive className="h-4 w-4" />
+                  Archivieren
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-400">
+                  <XCircle className="h-4 w-4" />
+                  Projekt löschen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline">
-            <Edit className="mr-2 h-4 w-4" />
-            Bearbeiten
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Archive className="h-4 w-4" />
-                Archivieren
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-400">
-                <XCircle className="h-4 w-4" />
-                Projekt löschen
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        
+        {/* Mobile: Title full width */}
+        <div className="sm:hidden">
+          <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+          <p className="text-muted-foreground">{project.client} • {project.category}</p>
+        </div>
+        
+        {/* Desktop: Original layout */}
+        <div className="hidden sm:flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+              <p className="text-muted-foreground">{project.client} • {project.category}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline">
+              <Edit className="mr-2 h-4 w-4" />
+              Bearbeiten
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Archive className="h-4 w-4" />
+                  Archivieren
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-400">
+                  <XCircle className="h-4 w-4" />
+                  Projekt löschen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -541,20 +591,28 @@ export default function ProjectDetailPage() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-medium">{project.client}</div>
+                {project.clientAddress && (
+                  <div className="mt-1 space-y-1">
+                    <p className="text-xs text-muted-foreground">
+                      {project.clientAddress.street}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {project.clientAddress.postalCode} {project.clientAddress.city}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {project.clientAddress.country}
+                    </p>
+                  </div>
+                )}
+              </div>
               <Avatar className="h-10 w-10">
                 <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                   {project.clientLogo || project.client.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <div className="font-medium">{project.client}</div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Badge className={getStatusColor(project.status)} variant="secondary">
-                    {project.status}
-                  </Badge>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -565,25 +623,25 @@ export default function ProjectDetailPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{project.progress}%</div>
-            <Progress value={project.progress} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-2">
-              Priorität: <Badge className={getPriorityColor(project.priority)} variant="outline">
-                {project.priority}
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">{project.progress}%</div>
+              <Badge className={getStatusColor(project.status)} variant="secondary">
+                {project.status}
               </Badge>
-            </p>
+            </div>
+            <Progress value={project.progress} className="mt-2" />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Budget</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{project.spent.toLocaleString()} €</div>
+            <div className="text-2xl font-bold">{formatCurrency(project.spent)} €</div>
             <p className="text-xs text-muted-foreground">
-              von {project.budget.toLocaleString()} € ({totalBudgetUsed.toFixed(1)}%) 
+              von {formatCurrency(project.budget)} € ({totalBudgetUsed.toFixed(1)}%) 
             </p>
             <Progress value={totalBudgetUsed} className="mt-2" />
           </CardContent>
@@ -616,18 +674,21 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Übersicht</TabsTrigger>
-          <TabsTrigger value="tickets">Tickets ({projectTickets.length})</TabsTrigger>
-          <TabsTrigger value="time">Zeiterfassung</TabsTrigger>
-          <TabsTrigger value="files">Dateien</TabsTrigger>
-          <TabsTrigger value="activity">Aktivität</TabsTrigger>
-        </TabsList>
+      <div className="overflow-x-hidden sm:overflow-x-visible">
+        <Tabs defaultValue="overview" className="space-y-4">
+          <div className="overflow-x-auto sm:overflow-x-visible -mx-6 px-6 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <TabsList className="w-max sm:w-auto">
+              <TabsTrigger value="overview">Übersicht</TabsTrigger>
+              <TabsTrigger value="tickets">Tickets ({projectTickets.length})</TabsTrigger>
+              <TabsTrigger value="time">Zeiterfassung</TabsTrigger>
+              <TabsTrigger value="files">Dateien</TabsTrigger>
+              <TabsTrigger value="activity">Aktivität</TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            <Card>
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <Card>
               <CardHeader>
                 <CardTitle>Projektdetails</CardTitle>
                 <CardDescription>Grundlegende Informationen zum Projekt</CardDescription>
@@ -723,6 +784,38 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
 
+                {/* Links */}
+                {project.externalLinks && project.externalLinks.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">Links</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {project.externalLinks.map((link, index) => {
+                          const styles = getPlatformStyles(link.platform);
+                          return (
+                            <a
+                              key={index}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-all border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 px-3 py-2"
+                            >
+                              {typeof styles.logo === 'string' ? (
+                                <span>{styles.logo}</span>
+                              ) : (
+                                styles.logo
+                              )}
+                              <span>{link.title}</span>
+                              <ExternalLinkIcon className="h-3 w-3" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+
               </CardContent>
             </Card>
 
@@ -767,6 +860,10 @@ export default function ProjectDetailPage() {
                   <div className="flex justify-between text-sm">
                     <span>Erfasste Zeit</span>
                     <span>{totalTimeLogged}h</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Stundensatz</span>
+                    <span>150 €</span>
                   </div>
                   <div className="flex justify-between text-sm font-medium">
                     <span>Budget verbraucht</span>
@@ -825,26 +922,67 @@ export default function ProjectDetailPage() {
           <div className="grid gap-4 grid-cols-1">
             <Card>
             <CardHeader>
-              <div className="flex flex-row items-center justify-between">
-                <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-0">
+                {/* Mobile: Title and description full width */}
+                <div className="sm:hidden space-y-2">
                   <CardTitle>Projekt Tickets</CardTitle>
                   <CardDescription>Alle Aufgaben und Tickets für dieses Projekt</CardDescription>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant={ticketView === "list" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTicketView("list")}
-                  >
-                    Liste
-                  </Button>
-                  <Button
-                    variant={ticketView === "kanban" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTicketView("kanban")}
-                  >
-                    Kanban
-                  </Button>
+                
+                {/* Mobile: TabsList below description */}
+                <div className="sm:hidden">
+                  <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+                    <button
+                      onClick={() => setTicketView("list")}
+                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        ticketView === "list" 
+                          ? "bg-background text-foreground shadow-sm" 
+                          : "hover:bg-background/50"
+                      }`}
+                    >
+                      Liste
+                    </button>
+                    <button
+                      onClick={() => setTicketView("kanban")}
+                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        ticketView === "kanban" 
+                          ? "bg-background text-foreground shadow-sm" 
+                          : "hover:bg-background/50"
+                      }`}
+                    >
+                      Kanban
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Desktop: Original layout with TabsList-styled buttons */}
+                <div className="hidden sm:flex flex-row items-center justify-between">
+                  <div className="space-y-2">
+                    <CardTitle>Projekt Tickets</CardTitle>
+                    <CardDescription>Alle Aufgaben und Tickets für dieses Projekt</CardDescription>
+                  </div>
+                  <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground gap-1">
+                    <button
+                      onClick={() => setTicketView("list")}
+                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        ticketView === "list" 
+                          ? "bg-background text-foreground shadow-sm" 
+                          : "hover:bg-background/50"
+                      }`}
+                    >
+                      Liste
+                    </button>
+                    <button
+                      onClick={() => setTicketView("kanban")}
+                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        ticketView === "kanban" 
+                          ? "bg-background text-foreground shadow-sm" 
+                          : "hover:bg-background/50"
+                      }`}
+                    >
+                      Kanban
+                    </button>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -854,7 +992,7 @@ export default function ProjectDetailPage() {
                   {projectTickets.map((ticket) => (
                     <div 
                       key={ticket.id} 
-                      className="flex items-center space-x-4 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => handleTicketClick(ticket)}
                     >
                       <div className="flex-1 min-w-0">
@@ -862,26 +1000,31 @@ export default function ProjectDetailPage() {
                           {getTicketStatusIcon(ticket.status)}
                           <h4 className="font-medium">{ticket.title}</h4>
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-1">
+                        <div className="flex sm:hidden mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {ticket.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1 mb-4 sm:mb-0">
                           {ticket.description}
                         </p>
-                        <div className="flex items-center space-x-4 mt-2">
+                        <div className="flex items-center justify-between sm:justify-start sm:space-x-4 mt-2 mb-2 sm:mb-0">
                           <span className="text-xs text-muted-foreground">
                             Assignee: {ticket.assignee}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             Due: {formatGermanDate(ticket.dueDate)}
                           </span>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                             {ticket.priority}
                           </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right sm:text-right mt-3 sm:mt-0">
                         <div className="text-sm font-medium">{ticket.actualHours}h / {ticket.estimatedHours}h</div>
                         <Progress 
                           value={(ticket.actualHours / ticket.estimatedHours) * 100} 
-                          className="w-20 mt-1" 
+                          className="w-full sm:w-20 mt-1" 
                         />
                       </div>
                     </div>
@@ -997,14 +1140,30 @@ export default function ProjectDetailPage() {
           <div className="grid gap-4 grid-cols-1">
             <Card>
               <CardHeader>
-                <div className="flex flex-row items-center justify-between">
-                  <div className="space-y-2">
+                <div className="space-y-2 sm:space-y-0">
+                  {/* Mobile: Title and description full width */}
+                  <div className="sm:hidden space-y-2">
                     <CardTitle>Projektdateien</CardTitle>
                     <CardDescription>Alle Dateien und Dokumente zu diesem Projekt</CardDescription>
                   </div>
-                  <Button variant="outline">
-                    Dateien hochladen
-                  </Button>
+                  
+                  {/* Mobile: Upload button below description */}
+                  <div className="sm:hidden">
+                    <Button variant="outline">
+                      Dateien hochladen
+                    </Button>
+                  </div>
+                  
+                  {/* Desktop: Original layout */}
+                  <div className="hidden sm:flex flex-row items-center justify-between">
+                    <div className="space-y-2">
+                      <CardTitle>Projektdateien</CardTitle>
+                      <CardDescription>Alle Dateien und Dokumente zu diesem Projekt</CardDescription>
+                    </div>
+                    <Button variant="outline">
+                      Dateien hochladen
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1037,7 +1196,7 @@ export default function ProjectDetailPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="hidden sm:flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="sm">
                             <Download className="h-4 w-4" />
                           </Button>
@@ -1091,8 +1250,9 @@ export default function ProjectDetailPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Ticket Detail Modal */}
       <Dialog open={isTicketModalOpen} onOpenChange={setIsTicketModalOpen}>
@@ -1372,22 +1532,22 @@ export default function ProjectDetailPage() {
 
       {/* Screenshot Modal */}
       <Dialog open={isScreenshotModalOpen} onOpenChange={setIsScreenshotModalOpen}>
-        <DialogContent className="!max-w-[85vw] !w-[85vw] !max-h-[85vh] !h-[85vh] p-0 bg-background [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80" style={{maxWidth: '85vw', width: '85vw', maxHeight: '85vh', height: '85vh'}}>
+        <DialogContent className="!max-w-[85vw] !w-[85vw] !max-h-[85vh] p-0 bg-background [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80 [&>button]:rounded-full [&>button]:bg-black/50 [&>button]:hover:bg-black/70 [&>button]:transition-colors [&>button]:p-1" style={{maxWidth: '85vw', width: '85vw', maxHeight: '85vh'}}>
           <DialogTitle className="sr-only">Screenshot Viewer</DialogTitle>
-          <div className="flex h-[85vh]">
-            {/* Left Side - Image */}
-            <div className="flex-1 flex items-center justify-center bg-black/5 dark:bg-black/20 rounded-l-lg overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:h-[85vh]">
+            {/* Top/Left Side - Image */}
+            <div className="flex items-center justify-center bg-black/5 dark:bg-black/20 rounded-t-lg sm:rounded-l-lg sm:rounded-tr-none sm:rounded-tl-lg overflow-hidden sm:flex-1">
               {selectedScreenshot && (
                 <img 
                   src={selectedScreenshot} 
                   alt="Screenshot"
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto md:h-full object-contain md:object-cover"
                 />
               )}
             </div>
             
-            {/* Right Side - Comments */}
-            <div className="w-80 border-l bg-background flex flex-col rounded-r-lg">
+            {/* Bottom/Right Side - Comments */}
+            <div className="w-full sm:w-80 border-t sm:border-l sm:border-t-0 bg-background flex flex-col rounded-b-lg sm:rounded-r-lg sm:rounded-bl-none">
               {/* Header */}
               <div className="p-4 border-b">
                 <h3 className="font-semibold">Kommentare</h3>
@@ -1567,18 +1727,19 @@ export default function ProjectDetailPage() {
           
           <Separator />
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsFileModalOpen(false)}>
-              Schließen
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-1 h-4 w-4" />
-              Herunterladen
-            </Button>
+          <div className="flex justify-between items-center">
             <Button variant="destructive">
               <Trash2 className="mr-1 h-4 w-4" />
               Löschen
             </Button>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => setIsFileModalOpen(false)}>
+                Schließen
+              </Button>
+              <Button variant="outline" size="icon">
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

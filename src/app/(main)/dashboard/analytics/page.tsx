@@ -24,7 +24,7 @@ import {
   YAxis,
   Cell,
 } from "recharts";
-import { TrendingUp, TrendingDown, Users, DollarSign, Clock, Target } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, Euro, Clock, Target } from "lucide-react";
 
 // Mock-Daten für Analytics
 const trafficData = [
@@ -71,6 +71,11 @@ export default function AnalyticsPage() {
   const totalConversions = trafficData.reduce((sum, data) => sum + data.conversions, 0);
   const avgConversionRate = (totalConversions / trafficData.reduce((sum, data) => sum + data.visitors, 0) * 100);
 
+  // Helper function to format currency consistently for server and client
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('de-DE');
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6">
       <div>
@@ -85,10 +90,10 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Gesamtumsatz</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <Euro className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totalRevenue)} €</div>
             <p className="text-xs text-muted-foreground">
               <span className="inline-flex items-center text-green-600">
                 <TrendingUp className="h-3 w-3 mr-1" />
@@ -313,7 +318,7 @@ export default function AnalyticsPage() {
                     <div className="text-sm text-muted-foreground">Projekte gesamt</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">€2.3M</div>
+                    <div className="text-2xl font-bold">2.3M €</div>
                     <div className="text-sm text-muted-foreground">Gesamtumsatz</div>
                   </div>
                 </div>
