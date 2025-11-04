@@ -49,7 +49,10 @@ import {
   Upload,
   HardDrive,
   User,
-  Trash2
+  Trash2,
+  CalendarClock,
+  Landmark,
+  Hourglass
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -447,52 +450,6 @@ export default function ProjectDetailPage() {
   const totalBudgetUsed = (project.spent / project.budget) * 100;
   const totalTimeLogged = mockTimeEntries.reduce((sum, entry) => sum + entry.hours, 0);
 
-  // Health Score Berechnung
-  const calculateHealthScore = () => {
-    let score = 100;
-    
-    // Budget-Faktor (30% Gewichtung)
-    if (totalBudgetUsed > 90) score -= 30;
-    else if (totalBudgetUsed > 80) score -= 20;
-    else if (totalBudgetUsed > 70) score -= 10;
-    
-    // Zeitplan-Faktor (30% Gewichtung)
-    const daysRemaining = Math.ceil((new Date(project.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    const totalDays = Math.ceil((new Date(project.endDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 60 * 60 * 24));
-    const timeProgress = ((totalDays - daysRemaining) / totalDays) * 100;
-    
-    if (timeProgress > project.progress + 20) score -= 30; // Sehr hinter Zeitplan
-    else if (timeProgress > project.progress + 10) score -= 15; // Etwas hinter Zeitplan
-    
-    // Ticket-Fortschritt (25% Gewichtung)
-    const completedTickets = projectTickets.filter(t => t.status === "Erledigt").length;
-    const totalTickets = projectTickets.length;
-    const ticketProgress = totalTickets > 0 ? (completedTickets / totalTickets) * 100 : 0;
-    
-    if (ticketProgress < 20 && project.progress > 50) score -= 25;
-    else if (ticketProgress < 40 && project.progress > 70) score -= 15;
-    
-    // Überfällige Tickets (15% Gewichtung)
-    const overdueTickets = projectTickets.filter(t => 
-      new Date(t.dueDate) < new Date() && t.status !== "Erledigt"
-    ).length;
-    
-    if (overdueTickets > 2) score -= 15;
-    else if (overdueTickets > 0) score -= 10;
-    
-    return Math.max(0, Math.min(100, score));
-  };
-
-  const healthScore = calculateHealthScore();
-  
-  const getHealthColor = (score: number) => {
-    if (score >= 80) return { color: "text-green-600", bg: "bg-green-100", label: "Ausgezeichnet" };
-    if (score >= 60) return { color: "text-yellow-600", bg: "bg-yellow-100", label: "Gut" };
-    if (score >= 40) return { color: "text-orange-600", bg: "bg-orange-100", label: "Aufmerksamkeit" };
-    return { color: "text-red-600", bg: "bg-red-100", label: "Kritisch" };
-  };
-
-  const healthStatus = getHealthColor(healthScore);
 
   const handleTicketClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
@@ -737,6 +694,17 @@ export default function ProjectDetailPage() {
                       </span>
                     </h4>
                   </div>
+                  <div>
+                    <h4 className="text-sm font-medium flex items-center justify-between">
+                      <span className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4" />
+                        Abrechnungsintervall
+                      </span>
+                      <span className="text-sm text-muted-foreground font-normal">
+                        Monatlich
+                      </span>
+                    </h4>
+                  </div>
                 </div>
 
                 <Separator />
@@ -865,67 +833,56 @@ export default function ProjectDetailPage() {
 
                 <Separator />
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex justify-between text-sm">
-                    <span>Geschätzte Zeit</span>
-                    <span>{projectTickets.reduce((sum, t) => sum + t.estimatedHours, 0)}h</span>
+                    <span className="flex items-center">
+                      <Clock className="mr-2 h-4 w-4" />
+                      Verfügbare Stunden
+                    </span>
+                    <span>40h</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Erfasste Zeit</span>
+                    <span className="flex items-center">
+                      <CalendarClock className="mr-2 h-4 w-4" />
+                      Verbrauchte Stunden
+                    </span>
                     <span>{totalTimeLogged}h</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Stundensatz</span>
+                    <span className="flex items-center">
+                      <Hourglass className="mr-2 h-4 w-4" />
+                      Restliche Stunden
+                    </span>
+                    <span>{40 - totalTimeLogged}h</span>
+                  </div>
+                </div>
+
+                  <Separator />
+
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center">
+                      <Wallet className="mr-2 h-4 w-4" />
+                      Stundensatz
+                    </span>
                     <span>150 €</span>
                   </div>
                   <div className="flex justify-between text-sm font-medium">
-                    <span>Budget verbraucht</span>
-                    <span>{totalBudgetUsed.toFixed(1)}%</span>
+                    <span className="flex items-center">
+                      <Landmark className="mr-2 h-4 w-4" />
+                      Monatliches Budget
+                    </span>
+                    <span>6.000 €</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Tage verbleibend</span>
-                    <span>{Math.ceil((new Date(project.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}</span>
+                    <span className="flex items-center">
+                      <Hourglass className="mr-2 h-4 w-4" />
+                      Übriges Budget
+                    </span>
+                    <span>2.700 €</span>
                   </div>
                 </div>
 
-                <Separator />
-
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium">Projekt Health Score</h4>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 rounded-full ${healthStatus.bg} flex items-center justify-center`}>
-                        <span className={`text-lg font-bold ${healthStatus.color}`}>
-                          {healthScore}
-                        </span>
-                      </div>
-                      <div>
-                        <div className={`font-medium ${healthStatus.color}`}>
-                          {healthStatus.label}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Basierend auf Budget, Zeitplan & Tickets
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-muted-foreground">Score</div>
-                      <div className={`text-sm font-bold ${healthStatus.color}`}>
-                        {healthScore}/100
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        healthScore >= 80 ? 'bg-green-500' :
-                        healthScore >= 60 ? 'bg-yellow-500' :
-                        healthScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${healthScore}%` }}
-                    />
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>

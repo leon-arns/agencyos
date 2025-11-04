@@ -10,6 +10,19 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { mockProjects, mockTickets, type Project, type Ticket, type ExternalLink } from "@/data/projects";
 import { 
   ArrowLeft, 
@@ -43,7 +56,9 @@ import {
   Upload,
   HardDrive,
   User,
-  Trash2
+  Trash2,
+  Hourglass
+
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -315,7 +330,7 @@ export default function ProjectDetailPage() {
   const [projectTickets, setProjectTickets] = useState<Ticket[]>([]);
   const [ticketView, setTicketView] = useState<"list" | "kanban">("list");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isTicketDrawerOpen, setIsTicketDrawerOpen] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [selectedScreenshotIndex, setSelectedScreenshotIndex] = useState<number | null>(null);
   const [isScreenshotModalOpen, setIsScreenshotModalOpen] = useState(false);
@@ -483,7 +498,7 @@ export default function ProjectDetailPage() {
 
   const handleTicketClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
-    setIsTicketModalOpen(true);
+    setIsTicketDrawerOpen(true);
   };
 
   const handleScreenshotClick = (screenshot: string, index?: number) => {
@@ -708,7 +723,7 @@ export default function ProjectDetailPage() {
                         <Calendar className="mr-2 h-4 w-4" />
                         Startdatum
                       </span>
-                      <span className="text-sm text-muted-foreground font-normal">
+                      <span className="text-sm font-normal">
                         {formatGermanDate(project.startDate)}
                       </span>
                     </h4>
@@ -719,7 +734,7 @@ export default function ProjectDetailPage() {
                         <Calendar className="mr-2 h-4 w-4" />
                         Enddatum
                       </span>
-                      <span className="text-sm text-muted-foreground font-normal">
+                      <span className="text-sm font-normal">
                         {formatGermanDate(project.endDate)}
                       </span>
                     </h4>
@@ -852,26 +867,46 @@ export default function ProjectDetailPage() {
 
                 <Separator />
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex justify-between text-sm">
-                    <span>Geschätzte Zeit</span>
+                    <span className="flex items-center">
+                      <Clock className="mr-2 h-4 w-4" />
+                      Geschätzte Zeit
+                    </span>
                     <span>{projectTickets.reduce((sum, t) => sum + t.estimatedHours, 0)}h</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Erfasste Zeit</span>
+                    <span className="flex items-center">
+                      <Activity className="mr-2 h-4 w-4" />
+                      Erfasste Zeit
+                    </span>
                     <span>{totalTimeLogged}h</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Stundensatz</span>
+                    <span className="flex items-center">
+                      <Hourglass className="mr-2 h-4 w-4" />
+                      Restliche Stunden
+                    </span>
+                    <span>{40 - totalTimeLogged}h</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center">
+                      <Wallet className="mr-2 h-4 w-4" />
+                      Stundensatz
+                    </span>
                     <span>150 €</span>
                   </div>
                   <div className="flex justify-between text-sm font-medium">
-                    <span>Budget verbraucht</span>
-                    <span>{totalBudgetUsed.toFixed(1)}%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Tage verbleibend</span>
-                    <span>{Math.ceil((new Date(project.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}</span>
+                    <span className="flex items-center">
+                      <Hourglass className="mr-2 h-4 w-4" />
+                      Budget übrig
+                    </span>
+                    <span>2.700 €</span>
                   </div>
                 </div>
 
@@ -881,13 +916,13 @@ export default function ProjectDetailPage() {
                   <h4 className="text-sm font-medium">Projekt Health Score</h4>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 rounded-full ${healthStatus.bg} flex items-center justify-center`}>
-                        <span className={`text-lg font-bold ${healthStatus.color}`}>
+                      <div className={`w-8 h-8 rounded-full ${healthStatus.bg} flex items-center justify-center`}>
+                        <span className={`text-md font-bold ${healthStatus.color}`}>
                           {healthScore}
                         </span>
                       </div>
                       <div>
-                        <div className={`font-medium ${healthStatus.color}`}>
+                        <div className={`font-medium text-sm ${healthStatus.color}`}>
                           {healthStatus.label}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -989,46 +1024,69 @@ export default function ProjectDetailPage() {
             <CardContent>
               {ticketView === "list" ? (
                 <div className="space-y-4">
-                  {projectTickets.map((ticket) => (
-                    <div 
-                      key={ticket.id} 
-                      className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => handleTicketClick(ticket)}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          {getTicketStatusIcon(ticket.status)}
-                          <h4 className="font-medium">{ticket.title}</h4>
-                        </div>
-                        <div className="flex sm:hidden mb-2">
-                          <Badge variant="outline" className="text-xs">
-                            {ticket.priority}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1 mb-4 sm:mb-0">
-                          {ticket.description}
-                        </p>
-                        <div className="flex items-center justify-between sm:justify-start sm:space-x-4 mt-2 mb-2 sm:mb-0">
-                          <span className="text-xs text-muted-foreground">
-                            Assignee: {ticket.assignee}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            Due: {formatGermanDate(ticket.dueDate)}
-                          </span>
-                          <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                            {ticket.priority}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-right sm:text-right mt-3 sm:mt-0">
-                        <div className="text-sm font-medium">{ticket.actualHours}h / {ticket.estimatedHours}h</div>
-                        <Progress 
-                          value={(ticket.actualHours / ticket.estimatedHours) * 100} 
-                          className="w-full sm:w-20 mt-1" 
-                        />
-                      </div>
-                    </div>
-                  ))}
+                  <Accordion type="multiple" defaultValue={["Zu erledigen", "In Abnahme"]} className="w-full space-y-4">
+                    {["Neu", "Zu erledigen", "In Abnahme", "Erledigt"].map((status) => {
+                      const statusTickets = projectTickets.filter(ticket => ticket.status === status);
+                      if (statusTickets.length === 0) return null;
+                      
+                      return (
+                        <AccordionItem key={status} value={status} className="border border-border rounded-lg">
+                          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center space-x-2">
+                              {getTicketStatusIcon(status as any)}
+                              <h3 className="font-semibold text-lg">{status}</h3>
+                              <Badge variant="secondary" className="ml-2">
+                                {statusTickets.length}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-0 pb-0">
+                            <div className="space-y-3 px-4 pb-4">
+                              {statusTickets.map((ticket) => (
+                                <div 
+                                  key={ticket.id} 
+                                  className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                                  onClick={() => handleTicketClick(ticket)}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <h4 className="font-medium">{ticket.title}</h4>
+                                    </div>
+                                    <div className="flex sm:hidden mb-2">
+                                      <Badge variant="outline" className="text-xs">
+                                        {ticket.priority}
+                                      </Badge>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1 mb-4 sm:mb-0">
+                                      {ticket.description}
+                                    </p>
+                                    <div className="flex items-center justify-between sm:justify-start sm:space-x-4 mt-2 mb-2 sm:mb-0">
+                                      <span className="text-xs text-muted-foreground">
+                                        Assignee: {ticket.assignee}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        Due: {formatGermanDate(ticket.dueDate)}
+                                      </span>
+                                      <Badge variant="outline" className="text-xs hidden sm:inline-flex">
+                                        {ticket.priority}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                  <div className="text-right sm:text-right mt-3 sm:mt-0">
+                                    <div className="text-sm font-medium">{ticket.actualHours}h / {ticket.estimatedHours}h</div>
+                                    <Progress 
+                                      value={(ticket.actualHours / ticket.estimatedHours) * 100} 
+                                      className="w-full sm:w-20 mt-1" 
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1254,21 +1312,21 @@ export default function ProjectDetailPage() {
         </Tabs>
       </div>
 
-      {/* Ticket Detail Modal */}
-      <Dialog open={isTicketModalOpen} onOpenChange={setIsTicketModalOpen}>
-        <DialogContent className="max-w-2xl bg-background max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:w-0.5 [&::-webkit-scrollbar]:h-0.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:h-5 hover:[&::-webkit-scrollbar-thumb]:bg-white/80">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+      {/* Ticket Detail Drawer */}
+      <Sheet open={isTicketDrawerOpen} onOpenChange={setIsTicketDrawerOpen}>
+        <SheetContent side="right" className="p-0 flex flex-col overflow-hidden" style={{width: '45vw', maxWidth: '45vw'}}>
+          <SheetHeader className="p-6 pb-4 border-b">
+            <SheetTitle className="flex items-center space-x-2">
               {selectedTicket && getTicketStatusIcon(selectedTicket.status)}
               <span>{selectedTicket?.title}</span>
-            </DialogTitle>
-            <DialogDescription>
-              Ticket #{selectedTicket?.id} • {selectedTicket?.priority} Priorität
-            </DialogDescription>
-          </DialogHeader>
+            </SheetTitle>
+            <SheetDescription>
+              Ticket #{selectedTicket?.id} • {project?.name}
+            </SheetDescription>
+          </SheetHeader>
           
           {selectedTicket && (
-            <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Status und Priorität */}
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
@@ -1496,39 +1554,11 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
 
-              {/* Tags */}
-              {selectedTicket.tags && selectedTicket.tags.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Tags</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTicket.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
 
-              <Separator />
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsTicketModalOpen(false)}>
-                  Schließen
-                </Button>
-                <Button>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Bearbeiten
-                </Button>
-              </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Screenshot Modal */}
       <Dialog open={isScreenshotModalOpen} onOpenChange={setIsScreenshotModalOpen}>
