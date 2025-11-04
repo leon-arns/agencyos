@@ -76,6 +76,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  KanbanBoard,
+  KanbanCard,
+  KanbanCards,
+  KanbanHeader,
+  KanbanProvider,
+} from '@/components/ui/shadcn-io/kanban';
 
 // Mock activity data
 const mockActivities = [
@@ -340,6 +347,16 @@ export default function ProjectDetailPage() {
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
 
+  const handleTicketDataChange = (newTickets: any[]) => {
+    // Convert back to Ticket format
+    const updatedTickets = newTickets.map(ticket => ({
+      ...ticket,
+      id: parseInt(ticket.id),
+      status: ticket.column as any
+    }));
+    setProjectTickets(updatedTickets);
+  };
+
   useEffect(() => {
     // Simulate API call to fetch project details
     const foundProject = mockProjects.find(p => p.id === projectId);
@@ -441,10 +458,10 @@ export default function ProjectDetailPage() {
   };
 
   const kanbanColumns = [
-    { id: "Neu", title: "Neu", color: "border-blue-200" },
-    { id: "Zu erledigen", title: "Zu erledigen", color: "border-yellow-200" },
-    { id: "In Abnahme", title: "In Abnahme", color: "border-purple-200" },
-    { id: "Erledigt", title: "Erledigt", color: "border-green-200" }
+    { id: "Neu", title: "Neu", color: "#6B7280" },
+    { id: "Zu erledigen", title: "Zu erledigen", color: "#F59E0B" },
+    { id: "In Abnahme", title: "In Abnahme", color: "#8B5CF6" },
+    { id: "Erledigt", title: "Erledigt", color: "#10B981" }
   ];
 
   const totalBudgetUsed = (project.spent / project.budget) * 100;
@@ -470,6 +487,55 @@ export default function ProjectDetailPage() {
   const handleFileClick = (file: any) => {
     setSelectedFile(file);
     setIsFileModalOpen(true);
+  };
+
+  // Einfache Markdown-zu-HTML Konvertierung
+  const renderMarkdownText = (text: string) => {
+    return text
+      .split('\n\n')
+      .map((paragraph, index) => {
+        if (paragraph.startsWith('**') && paragraph.endsWith(':**')) {
+          // Überschriften
+          const title = paragraph.slice(2, -3);
+          return <h5 key={index} className="font-semibold text-sm mt-4 mb-2">{title}</h5>;
+        } else if (paragraph.includes('•')) {
+          // Bullet Points
+          const items = paragraph.split('\n').filter(line => line.trim().startsWith('•'));
+          return (
+            <ul key={index} className="list-disc pl-4 space-y-1 mb-3">
+              {items.map((item, itemIndex) => (
+                <li key={itemIndex} className="text-sm text-muted-foreground">
+                  {item.replace('•', '').trim()}
+                </li>
+              ))}
+            </ul>
+          );
+        } else if (paragraph.includes('☑') || paragraph.includes('☐')) {
+          // Checkboxen
+          const items = paragraph.split('\n').filter(line => line.trim().match(/^[☑☐]/));
+          return (
+            <div key={index} className="space-y-2 mb-3">
+              {items.map((item, itemIndex) => {
+                const isChecked = item.trim().startsWith('☑');
+                const text = item.replace(/^[☑☐]\s*/, '').trim();
+                return (
+                  <div key={itemIndex} className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 border rounded flex items-center justify-center ${isChecked ? 'bg-green-100 border-green-500' : 'border-gray-300'}`}>
+                      {isChecked && <span className="text-green-600 text-xs">✓</span>}
+                    </div>
+                    <span className={`text-sm ${isChecked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                      {text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        } else {
+          // Normaler Text
+          return <p key={index} className="text-sm text-muted-foreground mb-3">{paragraph}</p>;
+        }
+      });
   };
 
   return (
@@ -1024,25 +1090,81 @@ export default function ProjectDetailPage() {
                   </Accordion>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {kanbanColumns.map((column) => {
-                    const columnTickets = projectTickets.filter(ticket => ticket.status === column.id);
-                    return (
-                      <div key={column.id} className={`rounded-lg border-2 ${column.color} bg-muted/20 p-4`}>
-                        <div className="mb-4">
-                          <h3 className="font-semibold text-sm flex items-center justify-between">
-                            {column.title}
-                            <Badge variant="secondary" className="ml-2">
-                              {columnTickets.length}
-                            </Badge>
-                          </h3>
+                <KanbanProvider
+                  columns={kanbanColumns.map(col => ({ id: col.id, name: col.title, color: col.color }))}
+                  data={projectTickets.map(ticket => ({ 
+                    ...ticket,
+                    id: ticket.id.toString(), 
+                    column: ticket.status,
+                    name: ticket.title
+                  }))}
+                  onDataChange={handleTicketDataChange}
+                  renderDragOverlay={(ticket: any) => (
+                    <div className="rounded-lg border bg-background p-3 shadow-lg opacity-90 w-80">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium text-sm line-clamp-2">{ticket.title}</h4>
+                        <Badge className={getPriorityColor(ticket.priority)} variant="outline">
+                          {ticket.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                        {ticket.description?.split('\n')[0] || ''}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="text-xs">
+                              {ticket.assignee.split(' ').map((n: string) => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-xs text-muted-foreground flex items-center space-x-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{formatGermanDate(ticket.dueDate)}</span>
+                          </div>
                         </div>
-                        <div className="space-y-3">
-                          {columnTickets.map((ticket) => (
+                        <div className="text-xs font-medium">
+                          {ticket.actualHours}h / {ticket.estimatedHours}h
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <Progress 
+                          value={(ticket.actualHours / ticket.estimatedHours) * 100} 
+                          className="h-1"
+                        />
+                      </div>
+                    </div>
+                  )}
+                >
+                  {(column) => (
+                    <KanbanBoard id={column.id} key={column.id}>
+                      <KanbanHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: column.color }}
+                            />
+                            <span>{column.name}</span>
+                          </div>
+                          <Badge variant="secondary">
+                            {projectTickets.filter(t => t.status === column.id).length}
+                          </Badge>
+                        </div>
+                      </KanbanHeader>
+                      <KanbanCards id={column.id}>
+                        {(ticket: any) => (
+                          <KanbanCard
+                            column={column.id}
+                            id={ticket.id}
+                            key={ticket.id}
+                            name={ticket.name}
+                          >
                             <div 
-                              key={ticket.id} 
-                              className="rounded-lg border bg-background p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => handleTicketClick(ticket)}
+                              className="w-full cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTicketClick(ticket);
+                              }}
                             >
                               <div className="flex items-start justify-between mb-2">
                                 <h4 className="font-medium text-sm line-clamp-2">{ticket.title}</h4>
@@ -1051,13 +1173,13 @@ export default function ProjectDetailPage() {
                                 </Badge>
                               </div>
                               <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-                                {ticket.description}
+                                {ticket.description?.split('\n')[0] || ''}
                               </p>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                   <Avatar className="h-6 w-6">
                                     <AvatarFallback className="text-xs">
-                                      {ticket.assignee.split(' ').map(n => n[0]).join('')}
+                                      {ticket.assignee.split(' ').map((n: string) => n[0]).join('')}
                                     </AvatarFallback>
                                   </Avatar>
                                   <div className="text-xs text-muted-foreground flex items-center space-x-1">
@@ -1065,7 +1187,7 @@ export default function ProjectDetailPage() {
                                     <span>{formatGermanDate(ticket.dueDate)}</span>
                                   </div>
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs font-medium">
                                   {ticket.actualHours}h / {ticket.estimatedHours}h
                                 </div>
                               </div>
@@ -1076,17 +1198,12 @@ export default function ProjectDetailPage() {
                                 />
                               </div>
                             </div>
-                          ))}
-                          {columnTickets.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground text-sm">
-                              Keine Tickets
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                          </KanbanCard>
+                        )}
+                      </KanbanCards>
+                    </KanbanBoard>
+                  )}
+                </KanbanProvider>
               )}
             </CardContent>
           </Card>
@@ -1335,9 +1452,9 @@ export default function ProjectDetailPage() {
               {/* Beschreibung */}
               <div>
                 <h4 className="text-sm font-medium mb-2">Beschreibung</h4>
-                <p className="text-sm text-muted-foreground">
-                  {selectedTicket.description}
-                </p>
+                <div className="text-sm text-muted-foreground">
+                  {renderMarkdownText(selectedTicket.description)}
+                </div>
               </div>
 
               {/* Externe Links */}

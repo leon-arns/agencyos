@@ -51,7 +51,7 @@ export function SearchDialog() {
   const handleSelect = (item: typeof searchItems[0]) => {
     setOpen(false);
     if (item.href && !item.disabled) {
-      router.push(item.href);
+      router.push(item.href as any);
     }
   };
 

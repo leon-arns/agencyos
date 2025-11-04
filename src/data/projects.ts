@@ -235,7 +235,7 @@ export const mockTickets: Ticket[] = [
     id: 1,
     projectId: 1,
     title: "Homepage Design fertigstellen",
-    description: "Responsive Design für Homepage mit Hero-Section und Feature-Übersicht. Das Design soll modern und ansprechend wirken, mit klarer Navigation und optimaler Darstellung auf allen Geräten. Besondere Aufmerksamkeit soll auf die Benutzerführung und Conversion-Optimierung gelegt werden.",
+    description: "Responsive Design für Homepage mit Hero-Section und Feature-Übersicht. Das Design soll modern und ansprechend wirken, mit klarer Navigation und optimaler Darstellung auf allen Geräten.\n\n**Hauptaufgaben:**\n• Hero-Section mit aussagekräftigem Call-to-Action\n• Feature-Übersicht mit Icons und Beschreibungen\n• Responsive Navigation für alle Gerätetypen\n• Footer mit wichtigen Links und Kontaktdaten\n\n**Checkliste:**\n☑ Wireframes erstellt und freigegeben\n☑ Design-System definiert (Farben, Fonts, Spacing)\n☐ Hero-Section Design fertiggestellt\n☐ Feature-Section responsive umgesetzt\n☐ Navigation für Mobile optimiert\n☐ Cross-Browser Testing durchgeführt\n☐ Performance-Optimierung implementiert\n\n**Technische Anforderungen:**\n• Verwendung von CSS Grid und Flexbox\n• Mobile-First Approach\n• Ladezeit unter 3 Sekunden\n• WCAG 2.1 AA Konformität für Barrierefreiheit",
     status: "Zu erledigen",
     priority: "High",
     assignee: "Lisa Schmidt",
