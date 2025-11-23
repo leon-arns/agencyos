@@ -1,6 +1,6 @@
-# 🧠 agencyOS
+# 🧠 agencyOS 
 
-**AgencyOS** ist ein modernes Dashboard-System für Agenturen und Freelancer.  
+**agencyOS** ist ein modernes Dashboard-System für Agenturen und Freelancer.  
 Es dient als zentrale Plattform zur Verwaltung von Projekten, Kunden, Aufgaben und Analysen –  
 aufgebaut mit **Next.js**, **shadcn/ui** und späterer Anbindung an **Supabase**.
 
